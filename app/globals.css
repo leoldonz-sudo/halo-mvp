@@ -982,6 +982,54 @@ body {
   background: #e6ae72;
 }
 
+/* Hero panel — natural image height, no object-cover */
+.official-panel--top {
+  min-height: unset;
+}
+
+.official-hero-wrap {
+  position: relative;
+  width: 100%;
+  overflow: hidden;
+}
+
+.official-hero-img {
+  display: block;
+  width: 100%;
+  height: auto;
+}
+
+/* Invisible hit areas over baked-in image buttons */
+.official-hit {
+  position: absolute;
+  z-index: 30;
+  pointer-events: auto;
+  background: transparent;
+  border-radius: 999px;
+}
+
+.official-hit:focus-visible {
+  outline: 2px solid #f2c678;
+  outline-offset: 4px;
+}
+
+/* "Map the Moments That Made Me" button area */
+.official-hit--primary {
+  left: 2.2%;
+  top: 68%;
+  width: 24%;
+  height: 8%;
+}
+
+/* "See How HALO Works" button area */
+.official-hit--secondary {
+  left: 29%;
+  top: 69%;
+  width: 17%;
+  height: 6%;
+}
+
+/* Non-hero panels — image fills full viewport height */
 .official-panel__image {
   width: 100%;
   height: 100svh;
@@ -999,50 +1047,6 @@ body {
   bottom: clamp(40px, 8vh, 80px);
   left: clamp(28px, 6vw, 100px);
   pointer-events: auto;
-}
-
-.official-hero-links {
-  position: absolute;
-  inset: 0;
-  pointer-events: none;
-}
-
-.official-hotspot {
-  position: absolute;
-  z-index: 4;
-  overflow: hidden;
-  color: transparent;
-  pointer-events: auto;
-  white-space: nowrap;
-}
-
-.official-hotspot:focus-visible {
-  outline: 2px solid #f2c678;
-  outline-offset: 5px;
-}
-
-.official-hotspot--primary {
-  left: 2.25%;
-  bottom: 9.5%;
-  width: 24.3%;
-  height: 7.1%;
-  border-radius: 999px;
-}
-
-.official-hotspot--secondary {
-  left: 28.6%;
-  bottom: 9.35%;
-  width: 17.1%;
-  height: 6.6%;
-  border-radius: 999px;
-}
-
-.official-hotspot--try {
-  right: 1.5%;
-  top: 3.6%;
-  width: 8.8%;
-  height: 7%;
-  border-radius: 999px;
 }
 
 .official-panel--text::after {
@@ -1151,6 +1155,9 @@ body {
   }
 
   .official-hero-links {
+    display: none;
+  }
+  .official-hit {
     display: none;
   }
 

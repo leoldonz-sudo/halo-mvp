@@ -2,64 +2,76 @@ import Image from "next/image";
 import Link from "next/link";
 import { SiteNav } from "@/components/site/SiteNav";
 
-const panels = [
-  {
-    id: "top",
-    src: "/site/hero.png",
-    alt: "HALO landing page hero showing a person stepping into warm light, with the message that every unseen moment carries its own halo.",
-    label: "Every unseen moment carries its own halo.",
-  },
-  {
-    id: "how-it-works",
-    src: "/site/how.png",
-    alt: "How HALO works: a small moment becomes a card, a question, and eventually a map.",
-    label: "How HALO works",
-  },
-  {
-    id: "memory-map",
-    src: "/site/map.png",
-    alt: "HALO memory map showing moment cards becoming nodes and arcs across a personal memory map.",
-    label: "Map the moments that made you",
-  },
-] as const;
-
 export default function SitePage() {
   return (
     <main className="official-site" id="top">
       <SiteNav />
-      {panels.map((panel) => (
-        <section
-          key={panel.id}
-          id={panel.id}
-          className={`official-panel official-panel--${panel.id}`}
-          aria-label={panel.label}
-        >
+
+      {/* ── Section 1: Hero ── */}
+      <section
+        className="official-panel official-panel--top"
+        aria-label="Every unseen moment carries its own halo."
+      >
+        <div className="official-hero-wrap">
           <Image
-            src={panel.src}
-            alt={panel.alt}
+            src="/site/hero.png"
+            alt="HALO landing page hero — every unseen moment carries its own halo."
             width={1672}
             height={941}
             sizes="100vw"
-            className="official-panel__image"
-            priority={panel.id === "top"}
+            className="official-hero-img"
+            priority
             unoptimized
           />
-          {panel.id === "top" ? (
-            <div className="official-hero-links" aria-label="Hero actions">
-              <Link className="official-hotspot official-hotspot--primary" href="/demo">
-                Map the Moments That Made Me
-              </Link>
-              <a className="official-hotspot official-hotspot--secondary" href="#how-it-works">
-                See How HALO Works
-              </a>
-              <Link className="official-hotspot official-hotspot--try" href="/demo">
-                Try HALO
-              </Link>
-            </div>
-          ) : null}
-        </section>
-      ))}
+          {/* Invisible hit areas over baked-in image buttons */}
+          <Link
+            href="/demo"
+            aria-label="Map the Moments That Made Me"
+            className="official-hit official-hit--primary"
+          />
+          <a
+            href="#how-it-works"
+            aria-label="See How HALO Works"
+            className="official-hit official-hit--secondary"
+          />
+        </div>
+      </section>
 
+      {/* ── Section 2: How it works ── */}
+      <section
+        id="how-it-works"
+        className="official-panel official-panel--how-it-works"
+        aria-label="How HALO works"
+      >
+        <Image
+          src="/site/how.png"
+          alt="How HALO works: a small moment becomes a card, a question, and eventually a map."
+          width={1672}
+          height={941}
+          sizes="100vw"
+          className="official-panel__image official-panel__image--cover"
+          unoptimized
+        />
+      </section>
+
+      {/* ── Section 3: Memory Map ── */}
+      <section
+        id="memory-map"
+        className="official-panel official-panel--memory-map"
+        aria-label="Map the moments that made you"
+      >
+        <Image
+          src="/site/map.png"
+          alt="HALO memory map showing moment cards becoming nodes and arcs across a personal memory map."
+          width={1672}
+          height={941}
+          sizes="100vw"
+          className="official-panel__image"
+          unoptimized
+        />
+      </section>
+
+      {/* ── Section 4: Share a Moment ── */}
       <section
         id="share-a-moment"
         className="official-panel official-panel--share"
@@ -76,6 +88,7 @@ export default function SitePage() {
         />
       </section>
 
+      {/* ── Section 5: Closing ── */}
       <section
         id="closing"
         className="official-panel official-panel--closing"
