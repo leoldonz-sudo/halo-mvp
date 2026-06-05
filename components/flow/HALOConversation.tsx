@@ -12,8 +12,7 @@ function hasCardIntent(text: string): boolean {
   return CARD_INTENT_WORDS.some((w) => t.includes(w));
 }
 
-/** After this many user turns the "Generate Moment Card" button auto-enables. */
-const MAX_FOLLOWUPS = 2;
+// Conversation never auto-ends — user decides when to create card
 
 /**
  * HALO guided recall.
@@ -182,7 +181,7 @@ function LiveConversation({
       const final: ChatTurn[] = [...next, { role: "halo", text: reply }];
       setMessages(final);
 
-      if (data.done || isClosure(reply) || userTurns >= MAX_FOLLOWUPS) {
+      if (data.done || isClosure(reply)) {
         setDone(true);
         onComplete();
       }
@@ -192,7 +191,7 @@ function LiveConversation({
       if (fallback) {
         const final: ChatTurn[] = [...next, fallback];
         setMessages(final);
-        if (isClosure(fallback.text) || userTurns >= MAX_FOLLOWUPS) {
+        if (isClosure(fallback.text)) {
           setDone(true);
           onComplete();
         }
@@ -267,7 +266,7 @@ function LiveConversation({
         <div ref={endRef} />
       </div>
 
-      {renderInput && !done && (
+      {renderInput && (
         <div className="mt-5 flex flex-col gap-2">
           <textarea
             value={input}

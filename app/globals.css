@@ -2068,3 +2068,32 @@ body {
   font-size: 9.5px;
   letter-spacing: 0.01em;
 }
+
+/* ── Tiny moment card hint inside map teaser ── */
+.hs-card-hint {
+  margin: 8px auto 0;
+  max-width: 220px;
+  padding: 7px 12px;
+  border: 1px solid rgba(216,211,200,0.75);
+  border-radius: 8px;
+  background: rgba(251,250,246,0.82);
+  box-shadow: 0 1px 5px rgba(0,0,0,0.05);
+}
+.hs-card-hint-label {
+  display: block;
+  font-family: var(--font-ui);
+  font-size: 7.5px;
+  font-weight: 700;
+  letter-spacing: 0.2em;
+  color: var(--faint);
+  text-transform: uppercase;
+  margin-bottom: 3px;
+}
+.hs-card-hint-quote {
+  font-family: var(--font-display);
+  font-size: 11px;
+  font-style: italic;
+  color: var(--ink-2);
+  margin: 0;
+  line-height: 1.4;
+}

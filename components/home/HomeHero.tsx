@@ -39,30 +39,39 @@ const NAV_TABS = [
   { label: "Profile",     Icon: NavProfile, active: false },
 ];
 
-// ── Ultra-light map teaser — just 3 amber dots + 2 curved lines ───────────────
-// Purely decorative SVG strip. No cards, no chips, no node labels.
+// ── Map teaser + tiny card hint ──────────────────────────────────────────────
 
 function MapTeaser() {
   const A = "#c9a05a";
   return (
     <div className="hs-teaser">
       <p className="hs-teaser-label">YOUR MAP IS WAITING TO BE LIT</p>
+
+      {/* Map constellation — 5 nodes, 4 connecting curves */}
       <div className="hs-teaser-visual" aria-hidden>
-        {/* 3 dots connected by 2 gentle curves, horizontally centred */}
-        <svg viewBox="0 0 160 20" preserveAspectRatio="xMidYMid meet"
-          style={{ width: "100%", maxWidth: 160, height: 20, display: "block", margin: "0 auto" }}>
-          {/* left dot → centre dot */}
-          <path d="M 16,10 Q 48,4 80,10" fill="none" stroke={A} strokeWidth="1" opacity="0.6" />
-          {/* centre dot → right dot */}
-          <path d="M 80,10 Q 112,16 144,10" fill="none" stroke={A} strokeWidth="1" opacity="0.6" />
-          {/* filled left dot */}
-          <circle cx="16" cy="10" r="3.5" fill={A} opacity="0.8" />
-          {/* filled centre dot */}
-          <circle cx="80" cy="10" r="3.5" fill={A} opacity="0.8" />
-          {/* hollow right dot */}
-          <circle cx="144" cy="10" r="3" fill="none" stroke={A} strokeWidth="1.2" opacity="0.6" />
+        <svg viewBox="0 0 280 36" preserveAspectRatio="xMidYMid meet"
+          style={{ width: "100%", maxWidth: 280, height: 36, display: "block", margin: "0 auto" }}>
+          {/* curves */}
+          <path d="M 22,18 Q 60,6  100,20" fill="none" stroke={A} strokeWidth="1" opacity="0.55"/>
+          <path d="M 100,20 Q 130,28 158,18" fill="none" stroke={A} strokeWidth="1" opacity="0.55"/>
+          <path d="M 158,18 Q 188,8  218,22" fill="none" stroke={A} strokeWidth="1" opacity="0.55"/>
+          <path d="M 218,22 Q 244,30 258,18" fill="none" stroke={A} strokeWidth="1" opacity="0.45"/>
+          {/* filled nodes */}
+          <circle cx="22"  cy="18" r="4"   fill={A} opacity="0.85"/>
+          <circle cx="100" cy="20" r="3.5" fill={A} opacity="0.75"/>
+          <circle cx="158" cy="18" r="5"   fill={A} opacity="0.90"/>
+          <circle cx="218" cy="22" r="3"   fill={A} opacity="0.65"/>
+          {/* hollow node — unlit future memory */}
+          <circle cx="258" cy="18" r="3" fill="none" stroke={A} strokeWidth="1.2" opacity="0.5"/>
         </svg>
       </div>
+
+      {/* Tiny moment card hint */}
+      <div className="hs-card-hint" aria-hidden>
+        <span className="hs-card-hint-label">MOMENT CARD</span>
+        <p className="hs-card-hint-quote">&ldquo;I kept this longer than I needed to.&rdquo;</p>
+      </div>
+
       <p className="hs-teaser-caption">One kept moment can begin a quiet map.</p>
     </div>
   );
@@ -108,11 +117,6 @@ export function HomeHero({ onPick }: { onPick: (type: EntryType) => void }) {
           <div className="hs-copy">
             <h1 className="hs-h1">Hello.<br />I see your<br />halo.</h1>
             <p className="hs-sub">Map the moments that made you.</p>
-            <p className="hs-body">
-              Start with something you kept,<br />
-              something you never captured,<br />
-              or a gentle question from HALO.
-            </p>
           </div>
 
           {/* Controlled spacer — lets hero breathe without leaving huge gap */}
