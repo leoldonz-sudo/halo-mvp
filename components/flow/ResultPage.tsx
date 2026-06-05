@@ -111,7 +111,7 @@ export function ResultPage({
             disabled={saveState === "saving"}
             className="halo-cta halo-cta-primary w-full"
           >
-            Keep this one
+            Keep this memory
           </button>
           <div className="flex gap-2.5">
             <button
@@ -187,75 +187,50 @@ export function ResultPage({
 }
 
 /* ----------------------------------------------------------------------------
- * Memory Map preview — warm paper constellation, NOT a knowledge graph.
- * One Moment Node (hollow → lit), the theme area, an arc hint, dark prompts.
+ * Compact arc strip — secondary teaser below the main card. Not a full map.
  * -------------------------------------------------------------------------- */
 function MemoryMapPreview({ seed, kept }: { seed: MemorySeed; kept: boolean }) {
   const m = seed.map;
   return (
     <section
       id="memory-map"
-      className="relative overflow-hidden rounded-[4px] border border-line"
-      style={{
-        backgroundImage: "url('/assets/map-bg.png')",
-        backgroundSize: "cover",
-        backgroundPosition: "center",
-      }}
+      className="rounded-[4px] border border-line bg-paper/80 px-4 py-4"
     >
-      <div className="bg-cream/55 px-5 py-6 backdrop-blur-[1px]">
-        <p className="font-mono text-[10px] uppercase tracking-[0.34em] text-rust">
-          {m.themeArea}
+      {/* Arc hint — one quiet line */}
+      <div className="flex items-center gap-2.5">
+        <span
+          id="moment-node"
+          className={`inline-block h-2.5 w-2.5 flex-none rounded-full border transition-colors duration-500 ${
+            kept ? "border-green bg-green" : "border-ink2/40 bg-transparent"
+          }`}
+        />
+        <p className="font-serif text-[13.5px] italic leading-snug text-ink2">
+          A quiet arc may be forming: {m.arcHint}
         </p>
-        <p className="mt-2 font-serif text-[13.5px] italic leading-relaxed text-ink2">
-          {m.arcHint}
-        </p>
-
-        <div className="mt-5 flex items-start gap-3">
-          <span className="relative mt-[3px] flex h-3.5 w-3.5 shrink-0 items-center justify-center">
-            {kept && <span aria-hidden className="map-halo-ring" />}
-            <span
-              id="moment-node"
-              className={`relative inline-block h-3.5 w-3.5 rounded-full border ${
-                kept ? "node-lit border-green bg-green" : "border-ink2/50 bg-transparent"
-              }`}
-            />
-          </span>
-          <div>
-            <p
-              className={`font-serif text-[16px] leading-snug ${
-                kept ? "text-ink" : "text-ink2"
-              }`}
-            >
-              {m.momentNode.title}
-            </p>
-            {kept && (
-              <p className="halo-rise mt-1 font-serif text-[13.5px] italic leading-snug text-ink2">
-                {m.momentNode.haloLine}
-              </p>
-            )}
-          </div>
-        </div>
-
-        {kept ? (
-          <p className="mt-4 font-mono text-[10px] uppercase tracking-[0.22em] text-green">
-            This moment has been kept.
-          </p>
-        ) : (
-          <>
-            <p className="mt-6 font-mono text-[10px] uppercase tracking-[0.26em] text-faint">
-              Moments you could keep next
-            </p>
-            <ul className="mt-2 flex flex-col gap-2 opacity-60">
-              {m.darkPrompts.map((p) => (
-                <li key={p} className="flex items-center gap-3">
-                  <span className="inline-block h-2 w-2 rounded-full border border-line" />
-                  <span className="font-serif text-[14px] text-ink2">{p}</span>
-                </li>
-              ))}
-            </ul>
-          </>
-        )}
       </div>
+
+      {/* Moments to keep next */}
+      {!kept && (
+        <>
+          <p className="mt-3.5 font-mono text-[9.5px] uppercase tracking-[0.26em] text-faint">
+            Moments you could keep next
+          </p>
+          <ul className="mt-1.5 flex flex-col gap-1.5 opacity-65">
+            {m.darkPrompts.slice(0, 3).map((p) => (
+              <li key={p} className="flex items-center gap-2.5">
+                <span className="inline-block h-1.5 w-1.5 flex-none rounded-full border border-line" />
+                <span className="font-serif text-[13px] text-ink2">{p}</span>
+              </li>
+            ))}
+          </ul>
+        </>
+      )}
+
+      {kept && (
+        <p className="mt-2.5 font-mono text-[9.5px] uppercase tracking-[0.22em] text-green">
+          This moment has been kept.
+        </p>
+      )}
     </section>
   );
 }
