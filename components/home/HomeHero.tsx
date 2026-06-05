@@ -2,7 +2,6 @@
 
 import Image from "next/image";
 import type { EntryType } from "@/lib/types";
-import { XiaomanAvatar } from "@/components/XiaomanAvatar";
 
 // ── Icons ────────────────────────────────────────────────────────────────────
 
@@ -40,52 +39,6 @@ const NAV_TABS = [
   { label: "Profile",     Icon: NavProfile, active: false },
 ];
 
-// ── Memory Map Teaser — pure dot constellation ───────────────────────────────
-
-function MapTeaser() {
-  const G = "#c9a05a";
-  // [cx, cy, r, opacity]
-  const dots: [number, number, number, number][] = [
-    [28,  18, 2.2, 0.50],
-    [72,  52, 1.6, 0.36],
-    [118, 14, 2.0, 0.46],
-    [162, 56, 1.4, 0.30],
-    [205, 20, 2.2, 0.50],
-    [248, 50, 1.6, 0.36],
-    [58,  70, 1.4, 0.28],
-    [148, 72, 1.8, 0.40],
-    [238, 70, 1.4, 0.28],
-    [280, 52, 1.6, 0.34],
-  ];
-  // Xiaoman node at top-right corner (index 10 in edges)
-  const XM = [316, 14] as const;
-  const edges: [number, number][] = [
-    [0,1],[1,2],[0,2],[2,4],[3,4],[3,1],[1,6],[6,7],[7,8],[5,8],[4,5],[8,9],[9,10],[4,10],
-  ];
-
-  return (
-    <div className="hs-teaser">
-      <p className="hs-teaser-label">YOUR MAP IS TAKING SHAPE</p>
-      <div className="hs-dotmap">
-        <svg viewBox="0 0 334 84" width="100%" style={{ display: "block" }} aria-hidden>
-          {edges.map(([a, b], i) => {
-            const [x1, y1] = a === 10 ? XM : dots[a];
-            const [x2, y2] = b === 10 ? XM : dots[b];
-            return <line key={i} x1={x1} y1={y1} x2={x2} y2={y2} stroke={G} strokeWidth="0.65" opacity="0.25" />;
-          })}
-          {dots.map(([cx, cy, r, op], i) => (
-            <circle key={i} cx={cx} cy={cy} r={r} fill={G} opacity={op} />
-          ))}
-          <circle cx={XM[0]} cy={XM[1]} r="15" fill={G} opacity="0.07" />
-          <circle cx={XM[0]} cy={XM[1]} r="10" fill={G} opacity="0.10" />
-        </svg>
-        <div className="hs-dotmap-avatar">
-          <XiaomanAvatar size={28} mood="idle" />
-        </div>
-      </div>
-    </div>
-  );
-}
 
 // ── Component ────────────────────────────────────────────────────────────────
 
@@ -151,8 +104,6 @@ export function HomeHero({ onPick }: { onPick: (type: EntryType) => void }) {
             ))}
           </div>
 
-          {/* Ultra-light map teaser — just a hint, not a section */}
-          <MapTeaser />
 
         </div>
       </div>
