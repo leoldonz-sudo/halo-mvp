@@ -1859,50 +1859,53 @@ body {
 
 .hs-sub {
   font-family: var(--font-display);
-  font-size: 16px;
+  font-size: 14.5px;
   line-height: 1.3;
   color: var(--ink-2);
-  margin: 0 0 0.35rem;
+  margin: 0 0 0.3rem;
 }
 
 .hs-body {
   font-family: var(--font-ui);
-  font-size: 11.5px;
-  line-height: 1.55;
+  font-size: 10.5px;
+  line-height: 1.5;
   color: var(--ink-2);
   margin: 0;
 }
 
-/* ── Entry cards ── */
+/* ── Entry cards — identical fixed height, no growth ── */
 .hs-cards {
   display: flex;
   flex-direction: column;
-  gap: 0.35rem;
-  margin-bottom: 0.625rem;
+  gap: 10px;
+  margin-bottom: 0;
 }
 
 .hs-card {
   display: flex;
   align-items: center;
-  gap: 0.625rem;
+  gap: 10px;
   width: 100%;
-  padding: 0.55rem 0.875rem 0.55rem 0.625rem;
+  height: 72px;           /* fixed — all three cards identical */
+  padding: 0 14px 0 10px;
   border: 1px solid rgba(216,211,200,0.8);
   border-radius: 12px;
   background: rgba(251,250,246,0.88);
   backdrop-filter: blur(8px);
   text-align: left;
   cursor: pointer;
+  overflow: hidden;       /* prevent content from expanding card */
   transition: transform 0.14s;
   box-shadow: 0 1px 8px rgba(0,0,0,0.07);
+  box-sizing: border-box;
 }
 
 .hs-card:active { transform: scale(0.983); }
 
 .hs-card-icon {
   flex: none;
-  width: 32px;
-  height: 32px;
+  width: 30px;
+  height: 30px;
   border-radius: 50%;
   background: var(--mist);
   border: 1px solid rgba(216,211,200,0.7);
@@ -1916,28 +1919,37 @@ body {
   flex: 1;
   display: flex;
   flex-direction: column;
-  gap: 1px;
+  gap: 2px;
   min-width: 0;
+  overflow: hidden;
 }
 
 .hs-card-title {
   font-family: var(--font-display);
-  font-size: 14.5px;
+  font-size: 14px;
   color: var(--ink);
   line-height: 1.2;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
 }
 
 .hs-card-sub {
   font-family: var(--font-ui);
-  font-size: 10.5px;
+  font-size: 10px;
   color: var(--ink-2);
-  line-height: 1.4;
+  line-height: 1.35;
+  display: -webkit-box;
+  -webkit-box-orient: vertical;
+  -webkit-line-clamp: 2;
+  overflow: hidden;
 }
 
 .hs-card-arrow {
   flex: none;
   font-size: 13px;
   color: var(--faint);
+  align-self: center;
 }
 
 /* ── Compact map preview ── */

@@ -147,9 +147,9 @@ export function HomeHero({ onPick }: { onPick: (type: EntryType) => void }) {
           </div>
 
           {/* Flex spacer — pushes cards toward lower screen */}
-          <div style={{ flex: 1, minHeight: 12 }} />
+          <div style={{ flex: 1, minHeight: 16, maxHeight: 80 }} />
 
-          {/* Three entry cards */}
+          {/* Three entry cards — fixed 72px height each */}
           <div className="hs-cards">
             {ENTRIES.map((e) => (
               <button key={e.type} type="button" onClick={() => onPick(e.type)} className="hs-card">
@@ -161,16 +161,6 @@ export function HomeHero({ onPick }: { onPick: (type: EntryType) => void }) {
                 <span className="hs-card-arrow">→</span>
               </button>
             ))}
-          </div>
-
-          {/* Compact map preview */}
-          <div className="hs-map">
-            <p className="hs-map-label">YOUR MAP IS WAITING TO BE LIT</p>
-            <MapPreview />
-            <div className="hs-map-zones">
-              <span>BELONGING</span>
-              <span>THINGS I CARRIED</span>
-            </div>
           </div>
 
         </div>{/* /hs-content */}
