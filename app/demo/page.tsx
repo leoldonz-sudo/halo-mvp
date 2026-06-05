@@ -7,6 +7,7 @@ import { HomeHero } from "@/components/home/HomeHero";
 import { MomentEntry, PhotoObjectEntry, GuideEntry } from "@/components/entry/Entries";
 import { HALOConversation } from "@/components/flow/HALOConversation";
 import { MemorySignalsPanel } from "@/components/flow/MemorySignalsPanel";
+import { deriveSignals } from "@/lib/deriveSignals";
 import { ResultPage } from "@/components/flow/ResultPage";
 
 type Step = "home" | "entry" | "conversation" | "result";
@@ -157,12 +158,11 @@ export default function Page() {
   }
 
   if (step === "conversation") {
-    const total = seed.transcript.length;
-    const sigTotal = seed.signals.length;
+    const liveSignals = deriveSignals(liveMessages);
+    const userTurns = liveMessages.filter((m) => m.role === "user").length;
+    // Reveal signals progressively: 1 after HALO opens, more as user speaks.
     const signalCount =
-      turns === 0
-        ? 1
-        : Math.min(sigTotal, 1 + Math.round((turns / total) * (sigTotal - 1)));
+      userTurns === 0 ? 1 : userTurns === 1 ? 4 : liveSignals.length;
 
     return (
       <main className="relative z-10 flex min-h-[100dvh] flex-col px-6 pt-[max(2.25rem,env(safe-area-inset-top))] pb-[max(2.5rem,env(safe-area-inset-bottom))]">
@@ -185,7 +185,7 @@ export default function Page() {
         />
 
         <div className="mt-7">
-          <MemorySignalsPanel signals={seed.signals} count={signalCount} />
+          <MemorySignalsPanel signals={liveSignals} count={signalCount} />
         </div>
 
         <div className="mt-auto pt-7">
