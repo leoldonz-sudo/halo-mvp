@@ -3,7 +3,7 @@
 import { useEffect, useState } from "react";
 import { useRef } from "react";
 import type { ChatTurn, EntryType, MemorySeed } from "@/lib/types";
-import { SEEDS, OBJECT_SEEDS, type ObjectSeedKey } from "@/lib/demoData";
+import { SEEDS, OBJECT_SEEDS, GUIDE_OPENERS, type ObjectSeedKey } from "@/lib/demoData";
 import { HomeHero } from "@/components/home/HomeHero";
 import { XiaomanAvatar } from "@/components/XiaomanAvatar";
 import { MomentEntry, PhotoObjectEntry, GuideEntry } from "@/components/entry/Entries";
@@ -64,11 +64,13 @@ export default function Page() {
 
   function pickGuideQuestion(question: string) {
     const base = SEEDS.guided;
+    // Use HALO's specific opener for this prompt, falling back to the question itself
+    const opener = GUIDE_OPENERS[question] ?? question;
     setCustomSeed({
       ...base,
-      openerQuestion: question,
+      openerQuestion: opener,
       transcript: [
-        { role: "halo", text: question },
+        { role: "halo", text: opener },
         ...base.transcript.slice(1),
       ],
     });
