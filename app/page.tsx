@@ -134,7 +134,7 @@ export default function SitePage() {
           <Link
             href="/demo"
             aria-label="Try demo"
-            className="absolute z-50 cursor-pointer pointer-events-auto bg-red-500/20 border border-red-500"
+            className="absolute z-50 cursor-pointer pointer-events-auto"
             style={{ left: "5%", top: "68%", width: "14%", height: "8%" }}
           />
         </div>
