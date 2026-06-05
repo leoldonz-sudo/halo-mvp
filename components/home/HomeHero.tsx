@@ -2,6 +2,25 @@
 
 import Image from "next/image";
 import type { EntryType } from "@/lib/types";
+import { XiaomanAvatar } from "@/components/XiaomanAvatar";
+
+function MapTeaser() {
+  const G = "#c9a05a";
+  return (
+    <div className="hs-teaser">
+      <p className="hs-teaser-label">YOUR MAP IS WAITING TO BE LIT</p>
+      <div className="hs-teaser-visual" aria-hidden>
+        <svg width="120" height="22" viewBox="0 0 120 22">
+          <path d="M 10,11 Q 60,4 110,11" fill="none" stroke={G} strokeWidth="0.9" opacity="0.42"/>
+          <circle cx="10"  cy="11" r="3"   fill={G} opacity="0.65"/>
+          <circle cx="60"  cy="6"  r="2"   fill={G} opacity="0.42"/>
+          <circle cx="110" cy="11" r="2.2" fill="none" stroke={G} strokeWidth="1.1" opacity="0.38"/>
+        </svg>
+      </div>
+      <p className="hs-teaser-caption">One kept moment can begin a quiet map.</p>
+    </div>
+  );
+}
 
 // ── Icons ────────────────────────────────────────────────────────────────────
 
@@ -76,16 +95,16 @@ export function HomeHero({ onPick }: { onPick: (type: EntryType) => void }) {
             </button>
           </div>
 
-          {/* Hero copy — spans wider so headline sits near the orb */}
           <div className="hs-copy">
             <h1 className="hs-h1">Hello,<br />I see your halo.</h1>
             <p className="hs-sub">Map the moments that made you.</p>
+            <p className="hs-body">Start with something you kept, something you never captured,<br />or a gentle question from HALO.</p>
           </div>
 
-          {/* Controlled spacer — lets hero breathe without leaving huge gap */}
-          <div className="hs-spacer" />
+          <div className="hs-spacer">
+            <XiaomanAvatar size={72} mood="idle" />
+          </div>
 
-          {/* Three entry cards — fixed height, uniform */}
           <div className="hs-cards">
             {ENTRIES.map((e) => (
               <button
@@ -104,6 +123,7 @@ export function HomeHero({ onPick }: { onPick: (type: EntryType) => void }) {
             ))}
           </div>
 
+          <MapTeaser />
 
         </div>
       </div>
