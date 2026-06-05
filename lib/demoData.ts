@@ -621,13 +621,13 @@ export const GUIDE_QUESTIONS = [
  *  Observation first, question second. Max 2 sentences. */
 export const GUIDE_OPENERS: Record<string, string> = {
   "A time I waited alone":
-    "You remembered the waiting. What comes back first — the place, or what you were waiting for?",
+    "You chose waiting. Sometimes people remember what happened. Sometimes they remember the waiting itself. What comes back first?",
   "A first morning somewhere new":
     "First mornings are strange. What did the light look like?",
   "Something I kept but can't explain":
     "Most things get thrown away. This one didn't. What is it?",
   "A photo I would never delete":
-    "You don't need to show me the photo. What happens when you look at it?",
+    "You don't need to show me the photo. Just tell me what happens when you look at it.",
   "A chat I still remember":
     "Something in that exchange stayed. What did the other person say?",
   "A place I keep thinking about":

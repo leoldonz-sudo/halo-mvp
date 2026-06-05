@@ -31,6 +31,7 @@ export default function Page() {
   // External input state for the pinned bottom input bar
   const [convInput, setConvInput] = useState("");
   const [convBusy, setConvBusy] = useState(false);
+  const [selectedGuidePrompt, setSelectedGuidePrompt] = useState<string | null>(null);
   const sendRef = useRef<(text: string) => void>(() => {});
 
   const seed = customSeed ?? SEEDS[entryType];
@@ -64,8 +65,8 @@ export default function Page() {
 
   function pickGuideQuestion(question: string) {
     const base = SEEDS.guided;
-    // Use HALO's specific opener for this prompt, falling back to the question itself
     const opener = GUIDE_OPENERS[question] ?? question;
+    setSelectedGuidePrompt(question);
     setCustomSeed({
       ...base,
       openerQuestion: opener,
@@ -91,6 +92,7 @@ export default function Page() {
     setLiveMessages([]);
     setResultSeed(null);
     setExtractError(null);
+    setSelectedGuidePrompt(null);
     setStep("home");
   }
 
@@ -197,6 +199,11 @@ export default function Page() {
 
         {/* ── Scrollable chat + signals ── */}
         <div className="halo-conv-body">
+          {selectedGuidePrompt && (
+            <div className="halo-conv-prompt-anchor">
+              <span>{selectedGuidePrompt}</span>
+            </div>
+          )}
           <HALOConversation
             seed={seed}
             preset={presetTalk}
