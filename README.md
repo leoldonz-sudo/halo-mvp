@@ -1,53 +1,297 @@
-# HALO MVP — 移动端 H5
+# HALO MVP
 
-跑通两个最短闭环：
-1. 拍 / 选一张图 → 和小满聊 → 生成记忆卡 → 收进小满记忆簿
-2. 打开 → 看记忆簿 / 卡片详情 → 再聊一件 / 回首页
+**HALO is an AI memory product that helps people remember the unseen steps behind who they became.**
 
-## 快速开始
+The world sees where you arrived.
+HALO helps you see and remember the quiet moments that brought you here.
+
+HALO turns small life moments into **Moment Cards**, connects them into personal **Memory Maps**, and lets users share a card or gentle question with someone they care about.
+
+---
+
+## What HALO Does
+
+Many people are seen through achievements, roles, and labels.
+
+HALO is designed for the parts of life that are often left unseen: the small moments, quiet struggles, old objects, forgotten photos, and private memories that shaped who someone became.
+
+Instead of asking users to write a full life story, HALO starts with one small fragment.
+
+A user can begin from:
+
+* a moment no one saw
+* a photo they kept
+* an object with memory attached
+* a gentle question from HALO
+
+HALO then helps the user turn that fragment into a structured memory asset.
+
+---
+
+## Core Product Loop
+
+This MVP focuses on two short closed loops:
+
+### Loop 1: Create a Moment Card
+
+1. Start from a photo, object, or memory prompt
+2. Talk it through with Xiaoman
+3. Generate a Moment Card
+4. Save it into the Memory Map
+
+### Loop 2: Return to the Memory Map
+
+1. Open the Memory Map
+2. View saved Moment Cards
+3. Open card details
+4. Continue with another memory or return home
+
+---
+
+## Key Concepts
+
+### Moment Card
+
+A **Moment Card** is a small memory asset generated from one life fragment.
+
+Each card may include:
+
+* the user’s original quote
+* concrete details from the memory
+* emotional tone
+* a restrained Halo Line
+* related theme
+* connection to the Memory Map
+
+The goal is not to beautify the memory too much.
+The goal is to preserve what felt real.
+
+---
+
+### Memory Map
+
+A **Memory Map** connects saved Moment Cards into a personal map of becoming.
+
+Each saved card becomes a **Moment Node**.
+
+Over time, repeated moments form:
+
+* quiet themes
+* emotional patterns
+* memory arcs
+* relationship threads
+
+The Memory Map helps users see not only what happened, but how they became who they are.
+
+---
+
+### Xiaoman
+
+**Xiaoman** is HALO’s warm memory companion.
+
+Xiaoman does not behave like a generic chatbot.
+It asks restrained, gentle questions and helps users stay close to the original memory.
+
+Xiaoman’s role is to:
+
+* help users start from a small fragment
+* avoid overwhelming life-story prompts
+* preserve the user’s original words
+* guide memory into structure
+* keep the experience emotionally safe
+
+---
+
+### Relationship Invitation
+
+A saved Moment Card can also become a relationship invitation.
+
+Users can share a card as-is, or send it with a gentle question to someone they care about.
+
+This allows the other person to add their own version of the memory.
+
+HALO starts with the self, but it can open into relationships.
+
+---
+
+## What HALO Is Not
+
+HALO is not:
+
+* a journaling app
+* a memoir writing tool
+* a therapy product
+* a generic chatbot
+* a simple camera app
+* a database of old photos
+
+HALO is a **memory elicitation and structuring engine** designed around:
+
+* restraint
+* original words
+* emotional safety
+* memory structure
+* human connection
+
+---
+
+## Product Positioning
+
+**One-line summary**
+
+HALO turns unseen life moments into Moment Cards and Memory Maps that can be shared with someone you care about.
+
+**Brand line**
+
+Every unseen moment carries its own halo.
+
+**Hero line**
+
+The world sees where you arrived.
+HALO remembers every step that brought you here.
+
+**CTA**
+
+Map the Moments That Made Me
+
+---
+
+## Current MVP Scope
+
+This MVP is a mobile-first H5 prototype.
+
+The current version focuses on:
+
+* memory entry
+* Xiaoman-guided conversation
+* Moment Card generation
+* Memory Map preview
+* saved card detail page
+* basic return flow
+
+The MVP is built to demonstrate the product logic, emotional experience, and core interaction loop.
+
+It is not yet a full production product.
+
+---
+
+## Quick Start
 
 ```bash
 cp .env.example .env.local
-# 在 .env.local 填入 OPENAI_API_KEY（仅服务端使用，永不暴露到前端）
+# Add OPENAI_API_KEY in .env.local if using server-side AI features
 
 npm install
 npm run dev
-# 打开 http://localhost:3000
+
+# Open http://localhost:3000
 ```
 
-如果没有配置 `OPENAI_API_KEY`：
-- `/api/chat` 会自动 fallback 到温柔的兜底开场池（PRD §5.4）；
-- `/api/generate-card` 会自动 fallback 到通用模板（PRD §7.2），仍能跑通全流程。
+If `OPENAI_API_KEY` is not configured:
 
-## 真机调试
+* `/api/chat` will fall back to a warm default conversation flow
+* `/api/generate-card` will fall back to a generic Moment Card template
+* the full demo flow can still run
 
-在和电脑同网段的手机上访问 `http://<电脑局域网 IP>:3000`，比如：
+---
+
+## Local Mobile Testing
+
+To test on a phone connected to the same local network:
 
 ```bash
 ipconfig getifaddr en0
-# 然后手机浏览器打开 http://192.168.x.x:3000
+# Then open http://<local-ip>:3000 on your phone
 ```
 
-## 路由
+Example:
 
-| 路径 | 文件 | 说明 |
-|------|------|------|
-| `/` | `app/page.tsx` | 首页两入口 |
-| `/capture` | `app/capture/page.tsx` | 拍 / 选图 + 本地压缩 |
-| `/chat` | `app/chat/page.tsx` | 小满聊天，含语音 mock、`canGenerateCard` 规则 |
-| `/card` | `app/card/page.tsx` | 卡片生成 + loading + 保存 |
-| `/book` | `app/book/page.tsx` | 小满记忆簿列表 + 空状态 |
-| `/book/[id]` | `app/book/[id]/page.tsx` | 卡片详情 + 删除 |
-| `/api/chat` | `app/api/chat/route.ts` | 小满回复（含图片识别） |
-| `/api/generate-card` | `app/api/generate-card/route.ts` | JSON 模式生成记忆卡 |
+```bash
+http://192.168.x.x:3000
+```
 
-## 数据存储
+---
 
-- 卡片列表 → `localStorage`（key: `halo.cards.v1`）
-- 当前聊天草稿 → `sessionStorage`（key: `halo.draft.v1`）
-- 图片：MVP 直接放在 base64 data URL 里（已在前端压缩到长边 ≤ 1280px、JPEG 0.82）。生产环境再迁移到 IndexedDB / 对象存储。
+## Main User Flow
 
-## 安全
+```text
+Home
+  ↓
+Choose an entry
+  ↓
+Talk with Xiaoman
+  ↓
+Generate Moment Card
+  ↓
+Save to Memory Map
+  ↓
+Open Memory Map
+  ↓
+View card detail
+  ↓
+Continue or return home
+```
 
-- `OPENAI_API_KEY` 仅在 Next.js 服务器路由读取，绝不出现在客户端 bundle。
-- 图片以 data URL 发到服务端，再以 OpenAI vision input 形式上行；不留存。
+---
+
+## Suggested Demo Script
+
+1. Open HALO homepage
+2. Start from one small moment
+3. Talk with Xiaoman
+4. Generate a Moment Card
+5. Save it into the Memory Map
+6. Show how the card becomes a node
+7. Explain how cards can later be shared with someone close
+
+---
+
+## Design Principles
+
+HALO should feel:
+
+* warm
+* restrained
+* human
+* quiet
+* emotionally safe
+* premium but not cold
+
+HALO should not feel like:
+
+* a SaaS dashboard
+* a productivity app
+* a therapy form
+* a generic chatbot
+* a social media template
+* a sentimental poster
+
+---
+
+## Future Direction
+
+Next versions may include:
+
+* shareable Moment Cards
+* gentle question invitations
+* shared Memory Maps between two people
+* family memory threads
+* relationship-based memory arcs
+* exportable keepsake cards or books
+* stronger AI memory signal extraction
+* privacy-first personal memory storage
+
+---
+
+## Project Status
+
+This is an early-stage MVP built for product validation and demo purposes.
+
+The current goal is to prove that one small memory fragment can become:
+
+1. a Moment Card
+2. a Memory Node
+3. part of a Memory Map
+4. a possible invitation for deeper connection
+
+HALO begins with one unseen moment, then helps people remember the quiet steps behind who they became.
