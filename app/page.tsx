@@ -1,40 +1,69 @@
-import Image from "next/image";
 import Link from "next/link";
-import { SiteNav } from "@/components/site/SiteNav";
+import Image from "next/image";
+
+// Shared debug classname — remove bg-red-500/20 and border-red-500 after confirming positions
+const HIT = "absolute z-50 cursor-pointer pointer-events-auto bg-red-500/20 border border-red-500";
 
 export default function SitePage() {
   return (
     <main className="official-site" id="top">
-      <SiteNav />
 
-      {/* ── Section 1: Hero ── */}
+      {/* ── Section 1: Hero — image is the only visible UI, hit areas scale with img ── */}
       <section
         className="official-panel official-panel--top"
         aria-label="Every unseen moment carries its own halo."
       >
-        <div className="official-hero-wrap">
-          <Image
+        {/*
+          Relative wrapper = positioning context for all hit areas.
+          img width:100% height:auto ensures the container height exactly
+          matches the rendered image height at every viewport width.
+        */}
+        <div style={{ position: "relative", width: "100%", overflow: "hidden" }}>
+          {/* eslint-disable-next-line @next/next/no-img-element */}
+          <img
             src="/site/hero.png"
-            alt="HALO landing page hero — every unseen moment carries its own halo."
-            width={1672}
-            height={941}
-            sizes="100vw"
-            className="official-hero-img"
-            priority
-            unoptimized
+            alt="HALO hero"
+            style={{ display: "block", width: "100%", height: "auto" }}
           />
-          {/* DEBUG: transparent red hit areas — remove bg/border after confirming position */}
+
+          {/* ── Baked-in TOP NAV hit areas ── */}
+          <a
+            href="#how-it-works"
+            aria-label="How it works"
+            className={HIT}
+            style={{ left: "61%", top: "4%", width: "9%", height: "5%" }}
+          />
+          <a
+            href="#memory-map"
+            aria-label="Memory Map"
+            className={HIT}
+            style={{ left: "72%", top: "4%", width: "10%", height: "5%" }}
+          />
+          <a
+            href="#share-a-moment"
+            aria-label="Share a moment"
+            className={HIT}
+            style={{ left: "82%", top: "4%", width: "10%", height: "5%" }}
+          />
+          <Link
+            href="/demo"
+            aria-label="Try HALO"
+            className={HIT}
+            style={{ left: "91%", top: "3.5%", width: "8%", height: "6%" }}
+          />
+
+          {/* ── Baked-in HERO CTA hit areas ── */}
           <Link
             href="/demo"
             aria-label="Map the Moments That Made Me"
-            className="official-hit official-hit--primary"
-            style={{ background: "rgba(239,68,68,0.2)", border: "1px solid rgb(239,68,68)" }}
+            className={HIT}
+            style={{ left: "2.2%", top: "74%", width: "24%", height: "7%" }}
           />
           <a
             href="#how-it-works"
             aria-label="See How HALO Works"
-            className="official-hit official-hit--secondary"
-            style={{ background: "rgba(239,68,68,0.2)", border: "1px solid rgb(239,68,68)" }}
+            className={HIT}
+            style={{ left: "29%", top: "75%", width: "16%", height: "6%" }}
           />
         </div>
       </section>
@@ -64,7 +93,7 @@ export default function SitePage() {
       >
         <Image
           src="/site/map.png"
-          alt="HALO memory map showing moment cards becoming nodes and arcs across a personal memory map."
+          alt="HALO memory map showing moment cards becoming nodes and arcs."
           width={1672}
           height={941}
           sizes="100vw"
@@ -81,7 +110,7 @@ export default function SitePage() {
       >
         <Image
           src="/site/share.png"
-          alt="A HALO memory card shared between a daughter and her mother, surrounded by related memory fragments."
+          alt="A HALO memory card shared between a daughter and her mother."
           width={1672}
           height={941}
           sizes="100vw"
@@ -98,7 +127,7 @@ export default function SitePage() {
       >
         <Image
           src="/site/closing.png"
-          alt="Two loved ones sitting together in warm morning light, connected by glowing HALO memory cards."
+          alt="Two loved ones sitting together in warm morning light."
           width={1672}
           height={941}
           sizes="100vw"
@@ -111,6 +140,7 @@ export default function SitePage() {
           </Link>
         </div>
       </section>
+
     </main>
   );
 }
