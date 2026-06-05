@@ -1,8 +1,7 @@
 import Link from "next/link";
 import Image from "next/image";
 
-// Shared debug classname — remove bg-red-500/20 and border-red-500 after confirming positions
-const HIT = "absolute z-50 cursor-pointer pointer-events-auto bg-red-500/20 border border-red-500";
+const HIT = "absolute z-50 cursor-pointer pointer-events-auto";
 
 export default function SitePage() {
   return (
