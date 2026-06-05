@@ -83,6 +83,11 @@ export function HomeHero({ onPick }: { onPick: (type: EntryType) => void }) {
         {/* LAYER 1 — flex column, all UI content */}
         <div className="hs-content">
 
+          {/* Xiaoman node — top-right corner */}
+          <div className="hs-xiaoman-node" aria-hidden>
+            <XiaomanAvatar size={40} mood="idle" />
+          </div>
+
           {/* Top bar */}
           <div className="hs-topbar">
             <span className="hs-wordmark">HALO</span>
@@ -98,7 +103,7 @@ export function HomeHero({ onPick }: { onPick: (type: EntryType) => void }) {
           <div className="hs-copy">
             <h1 className="hs-h1">Hello,<br />I see your halo.</h1>
             <p className="hs-sub">Map the moments that made you.</p>
-            <p className="hs-body">Start with something you kept, something you never captured,<br />or a gentle question from HALO.</p>
+            <p className="hs-body">Start with something you kept,<br />something you never captured,<br />or a gentle question from HALO.</p>
           </div>
 
           <div className="hs-spacer" />
