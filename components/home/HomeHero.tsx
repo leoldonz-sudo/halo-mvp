@@ -101,9 +101,7 @@ export function HomeHero({ onPick }: { onPick: (type: EntryType) => void }) {
             <p className="hs-body">Start with something you kept, something you never captured,<br />or a gentle question from HALO.</p>
           </div>
 
-          <div className="hs-spacer">
-            <XiaomanAvatar size={72} mood="idle" />
-          </div>
+          <div className="hs-spacer" />
 
           <div className="hs-cards">
             {ENTRIES.map((e) => (

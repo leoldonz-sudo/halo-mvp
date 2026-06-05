@@ -1906,11 +1906,11 @@ body {
   opacity: 0.8;
 }
 
-/* ── Xiaoman spacer — centers avatar between copy and cards ── */
+/* ── Spacer between copy and cards ── */
 .hs-spacer {
   flex: 1;
-  min-height: 72px;
-  max-height: 112px;
+  min-height: 16px;
+  max-height: 40px;
   display: flex;
   align-items: center;
   justify-content: center;
