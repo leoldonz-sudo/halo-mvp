@@ -82,30 +82,27 @@ const DOT_R = 3.5;
 
 type NodeDef = { key: string; label: string; left: number; top: number; cx: number; cy: number };
 
+// 3-node compact layout — viewBox "0 0 320 240"
+// Centre card: left=84, top=78, w=152, h=76 → centre (160,116)
 const NODES: NodeDef[] = [
-  { key: "tl", label: "A place I keep\nreturning to",          left:   4, top:  10, cx:  62, cy:  29 },
-  { key: "tr", label: "The first meal\nthat felt like home",   left: 200, top:  10, cx: 258, cy:  29 },
-  { key: "ml", label: "Calling my mother\nafter I arrived",    left:   4, top: 131, cx:  62, cy: 150 },
-  { key: "bl", label: "The night I\nalmost gave up",           left:  10, top: 236, cx:  68, cy: 255 },
-  { key: "br", label: "The day the city\nfelt familiar",       left: 200, top: 236, cx: 258, cy: 255 },
+  { key: "tl", label: "A place I keep\nreturning to",        left:   4, top:  8,  cx:  59, cy: 25 },
+  { key: "tr", label: "The first meal\nthat felt like home", left: 206, top:  8,  cx: 261, cy: 25 },
+  { key: "br", label: "The day the city\nfelt familiar",     left: 206, top: 186, cx: 261, cy: 203 },
 ];
 
-// Bezier path from card border point to node centre
 const PATHS = [
-  { from: { x: 110, y: 108 }, to: { cx:  62, cy:  29 }, cp: { x:  86, y:  68 } },  // → tl
-  { from: { x: 210, y: 108 }, to: { cx: 258, cy:  29 }, cp: { x: 234, y:  68 } },  // → tr
-  { from: { x:  82, y: 150 }, to: { cx:  62, cy: 150 }, cp: { x:  72, y: 150 } },  // → ml (flat)
-  { from: { x: 110, y: 192 }, to: { cx:  68, cy: 255 }, cp: { x:  89, y: 224 } },  // → bl
-  { from: { x: 210, y: 192 }, to: { cx: 258, cy: 255 }, cp: { x: 234, y: 224 } },  // → br
+  { from: { x: 110, y:  78 }, to: { cx:  59, cy:  25 }, cp: { x:  84, y:  50 } },  // → tl
+  { from: { x: 210, y:  78 }, to: { cx: 261, cy:  25 }, cp: { x: 236, y:  50 } },  // → tr
+  { from: { x: 210, y: 154 }, to: { cx: 261, cy: 203 }, cp: { x: 236, y: 178 } },  // → br
 ];
 
 function MemoryMap() {
   return (
-    <div style={{ position: "relative", width: "100%", height: 300 }}>
+    <div style={{ position: "relative", width: "100%", height: 240 }}>
 
       {/* ── SVG layer — always behind HTML elements ── */}
       <svg
-        viewBox="0 0 320 300"
+        viewBox="0 0 320 240"
         preserveAspectRatio="none"
         aria-hidden
         style={{
@@ -138,8 +135,8 @@ function MemoryMap() {
       {/* ── Centre moment card ── */}
       <div style={{
         position: "absolute",
-        left: 82, top: 108,
-        width: 156, height: 84,
+        left: 84, top: 78,
+        width: 152, height: 76,
         display: "flex",
         gap: 8,
         background: "#fbfaf6",
