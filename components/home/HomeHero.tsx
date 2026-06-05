@@ -2,6 +2,7 @@
 
 import Image from "next/image";
 import type { EntryType } from "@/lib/types";
+import { XiaomanAvatar } from "@/components/XiaomanAvatar";
 
 // ── Icons ────────────────────────────────────────────────────────────────────
 
@@ -39,98 +40,62 @@ const NAV_TABS = [
   { label: "Profile",     Icon: NavProfile, active: false },
 ];
 
-// ── 2D Memory Map Teaser ─────────────────────────────────────────────────────
-// A multi-dimensional web (面), not a linear track.
-// Mostly hollow nodes. One amber-glow HALO node in the web.
-// Paths cross in multiple directions to suggest depth and dimension.
+// ── Memory Map Teaser — miniature memory world ───────────────────────────────
+// Theme clusters + HALO as connector + tiny Moment Card preview.
 
 function MapTeaser() {
   const A = "#c9a05a";
-  // Node definitions: [cx, cy, type]
-  // type: "hollow" | "filled" | "halo"
-  const nodes: [number, number, "hollow" | "filled" | "halo"][] = [
-    [24,  16, "hollow"],   // TL cluster
-    [72,  48, "hollow"],
-    [28,  72, "hollow"],
-    [118, 10, "hollow"],   // top middle
-    [152, 42, "filled"],   // main anchor
-    [100, 80, "hollow"],
-    [190, 18, "hollow"],   // right cluster
-    [230, 52, "hollow"],
-    [175, 82, "hollow"],
-    [260, 28, "hollow"],
-    [248, 88, "hollow"],
-    [138, 98, "halo"],     // HALO orb node — amber, glowing
-  ];
-
-  // Paths connect nodes by index — create a web (面), not a chain
-  const edges: [number, number][] = [
-    [0, 1], [0, 3],
-    [1, 2], [1, 4], [1, 5],
-    [2, 5],
-    [3, 4], [3, 6],
-    [4, 5], [4, 6], [4, 11],
-    [5, 11],
-    [6, 7], [6, 9],
-    [7, 8], [7, 9],
-    [8, 10], [8, 11],
-    [9, 10],
-  ];
-
   return (
     <div className="hs-teaser">
       <p className="hs-teaser-label">YOUR MAP IS WAITING TO BE LIT</p>
 
-      <div aria-hidden style={{ width: "100%", lineHeight: 0 }}>
-        <svg
-          viewBox="0 0 290 112"
-          preserveAspectRatio="xMidYMid meet"
-          style={{ width: "100%", height: 112, display: "block" }}
-        >
-          {/* Edges — thin amber paths forming a 2D web */}
-          {edges.map(([a, b], i) => {
-            const [ax, ay] = nodes[a];
-            const [bx, by] = nodes[b];
-            // slight quadratic bend for organic feel
-            const mx = (ax + bx) / 2 + (by - ay) * 0.15;
-            const my = (ay + by) / 2 + (ax - bx) * 0.08;
-            return (
-              <path
-                key={i}
-                d={`M ${ax},${ay} Q ${mx},${my} ${bx},${by}`}
-                fill="none"
-                stroke={A}
-                strokeWidth="0.9"
-                opacity="0.45"
-              />
-            );
-          })}
+      {/* Memory map: two theme columns, HALO in centre row */}
+      <div className="hs-memmap">
 
-          {/* Nodes */}
-          {nodes.map(([cx, cy, type], i) => {
-            if (type === "halo") {
-              return (
-                <g key={i}>
-                  {/* soft glow ring */}
-                  <circle cx={cx} cy={cy} r="7" fill={A} opacity="0.12" />
-                  {/* filled amber centre */}
-                  <circle cx={cx} cy={cy} r="4.5" fill={A} opacity="0.85" />
-                </g>
-              );
-            }
-            if (type === "filled") {
-              return <circle key={i} cx={cx} cy={cy} r="3.5" fill={A} opacity="0.75" />;
-            }
-            // hollow — the majority
-            return (
-              <circle key={i} cx={cx} cy={cy} r="2.8"
-                fill="none" stroke={A} strokeWidth="1" opacity="0.50" />
-            );
-          })}
-        </svg>
+        {/* Top row: BELONGING (left) + STARTING OVER (right) */}
+        <div className="hs-mmrow">
+          <div className="hs-mmcluster">
+            <span className="hs-mmtheme">BELONGING</span>
+            <span className="hs-mmchip">Calling my mother</span>
+            <span className="hs-mmchip">First meal that felt like home</span>
+          </div>
+          <div className="hs-mmcluster hs-mmcluster--r">
+            <span className="hs-mmtheme">STARTING OVER</span>
+            <span className="hs-mmchip">Waiting for the City</span>
+            <span className="hs-mmchip">Carrying everything</span>
+          </div>
+        </div>
+
+        {/* Centre row: soft lines + HALO */}
+        <div className="hs-mmhalo-row" aria-hidden>
+          <svg viewBox="0 0 90 18" style={{ flex: 1, height: 18 }}>
+            <path d="M 2,9 Q 45,3 88,9" fill="none" stroke={A} strokeWidth="0.8" opacity="0.45"/>
+            <circle cx="4"  cy="9" r="1.8" fill={A} opacity="0.55"/>
+            <circle cx="88" cy="9" r="1.4" fill="none" stroke={A} strokeWidth="0.8" opacity="0.4"/>
+          </svg>
+          <XiaomanAvatar size={34} mood="idle" />
+          <svg viewBox="0 0 90 18" style={{ flex: 1, height: 18 }}>
+            <path d="M 2,9 Q 45,15 88,9" fill="none" stroke={A} strokeWidth="0.8" opacity="0.45"/>
+            <circle cx="2"  cy="9" r="1.4" fill="none" stroke={A} strokeWidth="0.8" opacity="0.4"/>
+            <circle cx="86" cy="9" r="1.8" fill={A} opacity="0.55"/>
+          </svg>
+        </div>
+
+        {/* Bottom row: THINGS I CARRIED, centred */}
+        <div className="hs-mmcluster hs-mmcluster--ctr">
+          <span className="hs-mmtheme">THINGS I CARRIED</span>
+          <div className="hs-mmchips-row">
+            <span className="hs-mmchip">Old notebook</span>
+            <span className="hs-mmchip">Train ticket</span>
+          </div>
+        </div>
       </div>
 
-      <p className="hs-teaser-caption">One kept moment can begin a quiet map.</p>
+      {/* Tiny Moment Card preview */}
+      <div className="hs-mmcard">
+        <span className="hs-mmcard-lbl">MOMENT CARD</span>
+        <p className="hs-mmcard-text">&ldquo;The train ticket was still in my wallet.&rdquo;</p>
+      </div>
     </div>
   );
 }
