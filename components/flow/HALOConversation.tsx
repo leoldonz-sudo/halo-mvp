@@ -5,6 +5,16 @@ import { XiaomanAvatar } from "@/components/XiaomanAvatar";
 import type { ChatTurn, MemorySeed } from "@/lib/types";
 import { isClosure } from "@/lib/haloPrompt";
 
+/** Intent words that skip further AI turns and go straight to card generation. */
+const CARD_INTENT_WORDS = ["结束", "我要卡片", "生成卡片", "保存", "done", "card please", "get card"];
+function hasCardIntent(text: string): boolean {
+  const t = text.trim().toLowerCase();
+  return CARD_INTENT_WORDS.some((w) => t.includes(w));
+}
+
+/** After this many user turns the "Generate Moment Card" button auto-enables. */
+const MAX_FOLLOWUPS = 2;
+
 /**
  * HALO guided recall.
  *
@@ -27,12 +37,15 @@ export function HALOConversation({
   onTurnsShown,
   onComplete,
   onMessages,
+  onGenerateCard,
 }: {
   seed: MemorySeed;
   preset?: boolean;
   onTurnsShown: (n: number) => void;
   onComplete: () => void;
   onMessages?: (messages: ChatTurn[]) => void;
+  /** Called when intent words are detected — triggers immediate card generation. */
+  onGenerateCard?: () => void;
 }) {
   if (preset) {
     return (
@@ -49,6 +62,7 @@ export function HALOConversation({
       onTurnsShown={onTurnsShown}
       onComplete={onComplete}
       onMessages={onMessages}
+      onGenerateCard={onGenerateCard}
     />
   );
 }
@@ -61,11 +75,13 @@ function LiveConversation({
   onTurnsShown,
   onComplete,
   onMessages,
+  onGenerateCard,
 }: {
   seed: MemorySeed;
   onTurnsShown: (n: number) => void;
   onComplete: () => void;
   onMessages?: (messages: ChatTurn[]) => void;
+  onGenerateCard?: () => void;
 }) {
   const opener =
     seed.transcript[0] ?? { role: "halo" as const, text: seed.openerQuestion };
@@ -96,11 +112,26 @@ function LiveConversation({
   async function send() {
     const text = input.trim();
     if (!text || busy || done) return;
+
+    // ── Intent shortcut: user wants the card now ──────────────────────────
+    if (hasCardIntent(text)) {
+      const next: ChatTurn[] = [...messages, { role: "user", text }];
+      setMessages(next);
+      setInput("");
+      setDone(true);
+      onComplete();
+      onGenerateCard?.();
+      return;
+    }
+
     const next: ChatTurn[] = [...messages, { role: "user", text }];
     setMessages(next);
     setInput("");
     setBusy(true);
     setSoftError(null);
+
+    // Count user turns AFTER appending this message.
+    const userTurns = next.filter((m) => m.role === "user").length;
 
     try {
       const r = await fetch("/api/halo/chat", {
@@ -121,24 +152,33 @@ function LiveConversation({
         done?: boolean;
         error?: string;
       };
-      const reply = (data.reply ?? "").trim();
+      let reply = (data.reply ?? "").trim();
       if (!reply) throw new Error("empty reply");
+
+      // Dedup: if the reply is identical to the last HALO message, pull the
+      // next frozen fallback instead to avoid repeating the same line.
+      const lastHalo = [...next].reverse().find((m) => m.role === "halo")?.text;
+      if (reply === lastHalo) {
+        const idx = userTurns * 2;
+        reply = seed.transcript[idx]?.text ?? reply;
+      }
+
       const final: ChatTurn[] = [...next, { role: "halo", text: reply }];
       setMessages(final);
-      if (data.done || isClosure(reply)) {
+
+      if (data.done || isClosure(reply) || userTurns >= MAX_FOLLOWUPS) {
         setDone(true);
         onComplete();
       }
     } catch (e) {
       // Fallback: pull the matching position from the frozen transcript so
       // the demo never strands the user when the API hiccups.
-      const userTurns = next.filter((m) => m.role === "user").length;
-      const idx = userTurns * 2; // halo opener at 0, halo replies at 2, 4 ...
+      const idx = userTurns * 2; // halo opener at 0, halo replies at 2, 4 …
       const fallback = seed.transcript[idx];
       if (fallback) {
         const final: ChatTurn[] = [...next, fallback];
         setMessages(final);
-        if (isClosure(fallback.text)) {
+        if (isClosure(fallback.text) || userTurns >= MAX_FOLLOWUPS) {
           setDone(true);
           onComplete();
         }

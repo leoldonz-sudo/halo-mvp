@@ -181,6 +181,7 @@ export default function Page() {
           onTurnsShown={setTurns}
           onComplete={() => setTalkDone(true)}
           onMessages={setLiveMessages}
+          onGenerateCard={goToResult}
         />
 
         <div className="mt-7">
@@ -191,7 +192,7 @@ export default function Page() {
           <button
             type="button"
             onClick={goToResult}
-            disabled={!talkDone || extracting}
+            disabled={(liveMessages.filter((m) => m.role === "user").length < 2 && !talkDone) || extracting}
             className="halo-cta halo-cta-primary w-full"
           >
             {extracting ? "Preserving your words..." : "Create my Moment Card"}
