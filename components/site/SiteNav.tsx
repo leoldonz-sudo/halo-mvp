@@ -23,8 +23,13 @@ export function SiteNav() {
         className="site-nav__logo"
         priority
       />
+      <div className="site-nav__links">
+        <a href="#how-it-works" className="site-nav__link">How it works</a>
+        <a href="#memory-map" className="site-nav__link">Memory Map</a>
+        <a href="#share-a-moment" className="site-nav__link">Share a moment</a>
+      </div>
       <Link href="/demo" className="site-nav__cta">
-        Try the demo →
+        Try HALO →
       </Link>
     </nav>
   );
