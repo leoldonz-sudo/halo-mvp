@@ -40,61 +40,48 @@ const NAV_TABS = [
   { label: "Profile",     Icon: NavProfile, active: false },
 ];
 
-// ── Memory Map Teaser — miniature memory world ───────────────────────────────
-// Theme clusters + HALO as connector + tiny Moment Card preview.
+// ── Memory Map Teaser — pure dot constellation ───────────────────────────────
 
 function MapTeaser() {
-  const A = "#c9a05a";
+  const G = "#c9a05a";
+  // [cx, cy, r, opacity]
+  const dots: [number, number, number, number][] = [
+    [28,  18, 2.2, 0.50],
+    [72,  52, 1.6, 0.36],
+    [118, 14, 2.0, 0.46],
+    [162, 56, 1.4, 0.30],
+    [205, 20, 2.2, 0.50],
+    [248, 50, 1.6, 0.36],
+    [58,  70, 1.4, 0.28],
+    [148, 72, 1.8, 0.40],
+    [238, 70, 1.4, 0.28],
+    [280, 52, 1.6, 0.34],
+  ];
+  // Xiaoman node at top-right corner (index 10 in edges)
+  const XM = [316, 14] as const;
+  const edges: [number, number][] = [
+    [0,1],[1,2],[0,2],[2,4],[3,4],[3,1],[1,6],[6,7],[7,8],[5,8],[4,5],[8,9],[9,10],[4,10],
+  ];
+
   return (
     <div className="hs-teaser">
-      <p className="hs-teaser-label">YOUR MAP IS WAITING TO BE LIT</p>
-
-      {/* Memory map: two theme columns, HALO in centre row */}
-      <div className="hs-memmap">
-
-        {/* Top row: BELONGING (left) + STARTING OVER (right) */}
-        <div className="hs-mmrow">
-          <div className="hs-mmcluster">
-            <span className="hs-mmtheme">BELONGING</span>
-            <span className="hs-mmchip">Calling my mother</span>
-            <span className="hs-mmchip">First meal that felt like home</span>
-          </div>
-          <div className="hs-mmcluster hs-mmcluster--r">
-            <span className="hs-mmtheme">STARTING OVER</span>
-            <span className="hs-mmchip">Waiting for the City</span>
-            <span className="hs-mmchip">Carrying everything</span>
-          </div>
+      <p className="hs-teaser-label">YOUR MAP IS TAKING SHAPE</p>
+      <div className="hs-dotmap">
+        <svg viewBox="0 0 334 84" width="100%" style={{ display: "block" }} aria-hidden>
+          {edges.map(([a, b], i) => {
+            const [x1, y1] = a === 10 ? XM : dots[a];
+            const [x2, y2] = b === 10 ? XM : dots[b];
+            return <line key={i} x1={x1} y1={y1} x2={x2} y2={y2} stroke={G} strokeWidth="0.65" opacity="0.25" />;
+          })}
+          {dots.map(([cx, cy, r, op], i) => (
+            <circle key={i} cx={cx} cy={cy} r={r} fill={G} opacity={op} />
+          ))}
+          <circle cx={XM[0]} cy={XM[1]} r="15" fill={G} opacity="0.07" />
+          <circle cx={XM[0]} cy={XM[1]} r="10" fill={G} opacity="0.10" />
+        </svg>
+        <div className="hs-dotmap-avatar">
+          <XiaomanAvatar size={28} mood="idle" />
         </div>
-
-        {/* Centre row: soft lines + HALO */}
-        <div className="hs-mmhalo-row" aria-hidden>
-          <svg viewBox="0 0 90 18" style={{ flex: 1, height: 18 }}>
-            <path d="M 2,9 Q 45,3 88,9" fill="none" stroke={A} strokeWidth="0.8" opacity="0.45"/>
-            <circle cx="4"  cy="9" r="1.8" fill={A} opacity="0.55"/>
-            <circle cx="88" cy="9" r="1.4" fill="none" stroke={A} strokeWidth="0.8" opacity="0.4"/>
-          </svg>
-          <XiaomanAvatar size={34} mood="idle" />
-          <svg viewBox="0 0 90 18" style={{ flex: 1, height: 18 }}>
-            <path d="M 2,9 Q 45,15 88,9" fill="none" stroke={A} strokeWidth="0.8" opacity="0.45"/>
-            <circle cx="2"  cy="9" r="1.4" fill="none" stroke={A} strokeWidth="0.8" opacity="0.4"/>
-            <circle cx="86" cy="9" r="1.8" fill={A} opacity="0.55"/>
-          </svg>
-        </div>
-
-        {/* Bottom row: THINGS I CARRIED, centred */}
-        <div className="hs-mmcluster hs-mmcluster--ctr">
-          <span className="hs-mmtheme">THINGS I CARRIED</span>
-          <div className="hs-mmchips-row">
-            <span className="hs-mmchip">Old notebook</span>
-            <span className="hs-mmchip">Train ticket</span>
-          </div>
-        </div>
-      </div>
-
-      {/* Tiny Moment Card preview */}
-      <div className="hs-mmcard">
-        <span className="hs-mmcard-lbl">MOMENT CARD</span>
-        <p className="hs-mmcard-text">&ldquo;The train ticket was still in my wallet.&rdquo;</p>
       </div>
     </div>
   );

@@ -1349,6 +1349,20 @@ body {
 .halo-conv-draft__btn:hover { border-color: var(--ink); }
 .halo-conv-draft__btn:disabled { opacity: 0.4; cursor: not-allowed; }
 
+/* ── Home dot-map teaser ── */
+.hs-dotmap {
+  position: relative;
+  width: 100%;
+}
+
+.hs-dotmap-avatar {
+  position: absolute;
+  /* align with SVG glow centre: x=316/334 from left, y=14/84 from top */
+  top: calc(16.7% - 14px);
+  right: calc(5.4% - 14px);
+  pointer-events: none;
+}
+
 .halo-conv-prompt-anchor {
   text-align: center;
   padding: 0.75rem 0 1rem;
