@@ -1202,3 +1202,228 @@ body {
     width: 100%;
   }
 }
+
+/* ============================================================
+   Conversation page — reference layout rebuild
+   ============================================================ */
+
+.halo-conv-shell {
+  display: flex;
+  flex-direction: column;
+  height: 100dvh;
+  background: var(--cream);
+  overflow: hidden;
+}
+
+.halo-conv-header {
+  flex: none;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 0.75rem 1.25rem;
+  border-bottom: 1px solid var(--line);
+  background: var(--cream);
+}
+
+.halo-conv-back {
+  font-size: 1.375rem;
+  color: var(--ink-2);
+  background: none;
+  border: none;
+  cursor: pointer;
+  line-height: 1;
+  padding: 0 0.25rem;
+}
+
+.halo-conv-title {
+  font-family: var(--font-ui);
+  font-size: 12px;
+  font-weight: 700;
+  letter-spacing: 0.32em;
+  color: var(--rust);
+  text-transform: uppercase;
+}
+
+.halo-conv-body {
+  flex: 1;
+  overflow-y: auto;
+  padding: 1.25rem 1.25rem 0.75rem;
+  display: flex;
+  flex-direction: column;
+  gap: 0.75rem;
+}
+
+.halo-conv-signals {
+  margin-top: 0.5rem;
+}
+
+.halo-conv-footer {
+  flex: none;
+  border-top: 1px solid var(--line);
+  background: var(--cream);
+  padding: 0.75rem 1.25rem max(0.75rem, env(safe-area-inset-bottom));
+  display: flex;
+  flex-direction: column;
+  gap: 0.625rem;
+}
+
+.halo-conv-input-row {
+  display: flex;
+  gap: 0.5rem;
+  align-items: flex-end;
+}
+
+.halo-conv-textarea {
+  flex: 1;
+  min-height: 44px;
+  max-height: 110px;
+  resize: none;
+  border-radius: 22px;
+  padding: 0.65rem 1rem;
+}
+
+.halo-conv-send {
+  flex: none;
+  height: 44px;
+  padding: 0 1.125rem;
+  background: var(--green);
+  color: var(--cream);
+  border: none;
+  border-radius: 22px;
+  font-family: var(--font-ui);
+  font-size: 14px;
+  font-weight: 500;
+  cursor: pointer;
+  transition: opacity 0.15s;
+}
+
+.halo-conv-send:disabled { opacity: 0.38; cursor: not-allowed; }
+
+.halo-conv-draft {
+  display: flex;
+  align-items: center;
+  gap: 0.625rem;
+  padding: 0.5rem 0.75rem;
+  border-radius: 10px;
+  background: var(--paper);
+  border: 1px solid var(--line);
+}
+
+.halo-conv-draft__spark {
+  color: var(--rust);
+  font-size: 16px;
+  flex-shrink: 0;
+}
+
+.halo-conv-draft__text { flex: 1; min-width: 0; }
+
+.halo-conv-draft__title {
+  margin: 0;
+  font-family: var(--font-ui);
+  font-size: 12px;
+  font-weight: 600;
+  color: var(--ink);
+}
+
+.halo-conv-draft__sub {
+  margin: 0;
+  font-family: var(--font-ui);
+  font-size: 11px;
+  color: var(--ink-2);
+}
+
+.halo-conv-draft__btn {
+  flex: none;
+  padding: 0.35rem 0.8rem;
+  border: 1px solid var(--line);
+  border-radius: 6px;
+  background: var(--paper);
+  color: var(--ink);
+  font-family: var(--font-ui);
+  font-size: 12px;
+  cursor: pointer;
+  white-space: nowrap;
+  transition: border-color 0.15s;
+}
+
+.halo-conv-draft__btn:hover { border-color: var(--ink); }
+.halo-conv-draft__btn:disabled { opacity: 0.4; cursor: not-allowed; }
+
+/* ── HALO IS NOTICING panel ── */
+.halo-noticing { margin: 0.25rem 0; }
+
+.halo-noticing__header {
+  display: flex;
+  align-items: center;
+  gap: 0.625rem;
+  margin-bottom: 0.75rem;
+}
+
+.halo-noticing__rule {
+  flex: 1;
+  height: 1px;
+  background: var(--line);
+}
+
+.halo-noticing__label {
+  font-family: var(--font-ui);
+  font-size: 10px;
+  font-weight: 700;
+  letter-spacing: 0.2em;
+  color: var(--rust);
+  white-space: nowrap;
+}
+
+.halo-noticing__grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 0.5rem;
+}
+
+/* ── individual signal card ── */
+.halo-signal-card {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  padding: 0.5rem 0.625rem;
+  border-radius: 10px;
+  background: var(--paper);
+  border: 1px solid var(--line);
+}
+
+.halo-signal-card__icon {
+  flex: none;
+  width: 26px;
+  height: 26px;
+  border-radius: 7px;
+  background: var(--mist);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: var(--ink-2);
+}
+
+.halo-signal-card__body {
+  min-width: 0;
+  overflow: hidden;
+  display: flex;
+  flex-direction: column;
+}
+
+.halo-signal-card__lbl {
+  font-family: var(--font-ui);
+  font-size: 9px;
+  font-weight: 600;
+  color: var(--faint);
+  text-transform: capitalize;
+  letter-spacing: 0.05em;
+}
+
+.halo-signal-card__val {
+  font-family: var(--font-ui);
+  font-size: 12px;
+  color: var(--ink);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}

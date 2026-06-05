@@ -38,14 +38,21 @@ export function HALOConversation({
   onComplete,
   onMessages,
   onGenerateCard,
+  renderInput = true,
+  showHeader = true,
+  onRegisterSend,
+  onBusyChange,
 }: {
   seed: MemorySeed;
   preset?: boolean;
   onTurnsShown: (n: number) => void;
   onComplete: () => void;
   onMessages?: (messages: ChatTurn[]) => void;
-  /** Called when intent words are detected — triggers immediate card generation. */
   onGenerateCard?: () => void;
+  renderInput?: boolean;
+  showHeader?: boolean;
+  onRegisterSend?: (fn: (text: string) => void) => void;
+  onBusyChange?: (busy: boolean) => void;
 }) {
   if (preset) {
     return (
@@ -53,6 +60,7 @@ export function HALOConversation({
         seed={seed}
         onTurnsShown={onTurnsShown}
         onComplete={onComplete}
+        showHeader={showHeader}
       />
     );
   }
@@ -63,6 +71,10 @@ export function HALOConversation({
       onComplete={onComplete}
       onMessages={onMessages}
       onGenerateCard={onGenerateCard}
+      renderInput={renderInput}
+      showHeader={showHeader}
+      onRegisterSend={onRegisterSend}
+      onBusyChange={onBusyChange}
     />
   );
 }
@@ -76,12 +88,20 @@ function LiveConversation({
   onComplete,
   onMessages,
   onGenerateCard,
+  renderInput = true,
+  showHeader = true,
+  onRegisterSend,
+  onBusyChange,
 }: {
   seed: MemorySeed;
   onTurnsShown: (n: number) => void;
   onComplete: () => void;
   onMessages?: (messages: ChatTurn[]) => void;
   onGenerateCard?: () => void;
+  renderInput?: boolean;
+  showHeader?: boolean;
+  onRegisterSend?: (fn: (text: string) => void) => void;
+  onBusyChange?: (busy: boolean) => void;
 }) {
   const opener =
     seed.transcript[0] ?? { role: "halo" as const, text: seed.openerQuestion };
@@ -109,28 +129,30 @@ function LiveConversation({
     endRef.current?.scrollIntoView({ block: "end", behavior: "smooth" });
   }, [messages, onTurnsShown, onMessages]);
 
-  async function send() {
-    const text = input.trim();
-    if (!text || busy || done) return;
+  // Notify parent when busy changes (so external input can be disabled).
+  useEffect(() => {
+    onBusyChange?.(busy);
+  }, [busy, onBusyChange]);
 
-    // ── Intent shortcut: user wants the card now ──────────────────────────
-    if (hasCardIntent(text)) {
-      const next: ChatTurn[] = [...messages, { role: "user", text }];
+  // Core send logic — accepts text as a param so it can be called externally.
+  async function sendText(text: string) {
+    const t = text.trim();
+    if (!t || busy || done) return;
+
+    if (hasCardIntent(t)) {
+      const next: ChatTurn[] = [...messages, { role: "user", text: t }];
       setMessages(next);
-      setInput("");
       setDone(true);
       onComplete();
       onGenerateCard?.();
       return;
     }
 
-    const next: ChatTurn[] = [...messages, { role: "user", text }];
+    const next: ChatTurn[] = [...messages, { role: "user", text: t }];
     setMessages(next);
-    setInput("");
     setBusy(true);
     setSoftError(null);
 
-    // Count user turns AFTER appending this message.
     const userTurns = next.filter((m) => m.role === "user").length;
 
     try {
@@ -147,16 +169,10 @@ function LiveConversation({
         }),
       });
       if (!r.ok) throw new Error(`chat ${r.status}`);
-      const data = (await r.json()) as {
-        reply?: string;
-        done?: boolean;
-        error?: string;
-      };
+      const data = (await r.json()) as { reply?: string; done?: boolean; error?: string };
       let reply = (data.reply ?? "").trim();
       if (!reply) throw new Error("empty reply");
 
-      // Dedup: if the reply is identical to the last HALO message, pull the
-      // next frozen fallback instead to avoid repeating the same line.
       const lastHalo = [...next].reverse().find((m) => m.role === "halo")?.text;
       if (reply === lastHalo) {
         const idx = userTurns * 2;
@@ -171,9 +187,7 @@ function LiveConversation({
         onComplete();
       }
     } catch (e) {
-      // Fallback: pull the matching position from the frozen transcript so
-      // the demo never strands the user when the API hiccups.
-      const idx = userTurns * 2; // halo opener at 0, halo replies at 2, 4 …
+      const idx = userTurns * 2;
       const fallback = seed.transcript[idx];
       if (fallback) {
         const final: ChatTurn[] = [...next, fallback];
@@ -191,8 +205,23 @@ function LiveConversation({
     }
   }
 
+  // Keep a stable ref to sendText so onRegisterSend captures the latest version.
+  const sendTextRef = useRef(sendText);
+  useEffect(() => { sendTextRef.current = sendText; });
+
+  // Register send fn with parent (once on mount).
+  useEffect(() => {
+    onRegisterSend?.((text) => sendTextRef.current(text));
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
+
+  // Internal send — used when renderInput=true (own textarea).
+  async function send() {
+    await sendText(input.trim());
+    setInput("");
+  }
+
   function onKeyDown(e: React.KeyboardEvent<HTMLTextAreaElement>) {
-    // Enter sends, Shift+Enter inserts a newline.
     if (e.key === "Enter" && !e.shiftKey) {
       e.preventDefault();
       send();
@@ -201,14 +230,16 @@ function LiveConversation({
 
   return (
     <div className="flex flex-col">
-      <div className="flex items-center gap-3">
-        <XiaomanAvatar size={46} mood={busy ? "thinking" : "idle"} priority />
-        <span className="font-mono text-[11px] uppercase tracking-[0.32em] text-faint">
-          HALO
-        </span>
-      </div>
+      {showHeader && (
+        <div className="flex items-center gap-3">
+          <XiaomanAvatar size={46} mood={busy ? "thinking" : "idle"} priority />
+          <span className="font-mono text-[11px] uppercase tracking-[0.32em] text-faint">
+            HALO
+          </span>
+        </div>
+      )}
 
-      <div className="mt-5 flex flex-col gap-3">
+      <div className={`flex flex-col gap-3 ${showHeader ? "mt-5" : ""}`}>
         {messages.map((t, idx) => (
           <div
             key={idx}
@@ -236,7 +267,7 @@ function LiveConversation({
         <div ref={endRef} />
       </div>
 
-      {!done && (
+      {renderInput && !done && (
         <div className="mt-5 flex flex-col gap-2">
           <textarea
             value={input}
@@ -273,10 +304,12 @@ function PresetTranscript({
   seed,
   onTurnsShown,
   onComplete,
+  showHeader = true,
 }: {
   seed: MemorySeed;
   onTurnsShown: (n: number) => void;
   onComplete: () => void;
+  showHeader?: boolean;
 }) {
   const transcript = seed.transcript;
   const cb = useRef({ onTurnsShown, onComplete });
@@ -290,13 +323,15 @@ function PresetTranscript({
 
   return (
     <div className="flex flex-col">
-      <div className="flex items-center gap-3">
-        <XiaomanAvatar size={46} mood="idle" priority />
-        <span className="font-mono text-[11px] uppercase tracking-[0.32em] text-faint">
-          HALO
-        </span>
-      </div>
-      <div className="mt-5 flex flex-col gap-3">
+      {showHeader && (
+        <div className="flex items-center gap-3">
+          <XiaomanAvatar size={46} mood="idle" priority />
+          <span className="font-mono text-[11px] uppercase tracking-[0.32em] text-faint">
+            HALO
+          </span>
+        </div>
+      )}
+      <div className={`flex flex-col gap-3 ${showHeader ? "mt-5" : ""}`}>
         {transcript.map((t, idx) => (
           <div
             key={idx}

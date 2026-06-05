@@ -1,9 +1,11 @@
 "use client";
 
 import { useEffect, useState } from "react";
+import { useRef } from "react";
 import type { ChatTurn, EntryType, MemorySeed } from "@/lib/types";
 import { SEEDS, OBJECT_SEEDS, type ObjectSeedKey } from "@/lib/demoData";
 import { HomeHero } from "@/components/home/HomeHero";
+import { XiaomanAvatar } from "@/components/XiaomanAvatar";
 import { MomentEntry, PhotoObjectEntry, GuideEntry } from "@/components/entry/Entries";
 import { HALOConversation } from "@/components/flow/HALOConversation";
 import { MemorySignalsPanel } from "@/components/flow/MemorySignalsPanel";
@@ -26,6 +28,10 @@ export default function Page() {
   const [extracting, setExtracting] = useState(false);
   const [extractError, setExtractError] = useState<string | null>(null);
   const [resultSeed, setResultSeed] = useState<MemorySeed | null>(null);
+  // External input state for the pinned bottom input bar
+  const [convInput, setConvInput] = useState("");
+  const [convBusy, setConvBusy] = useState(false);
+  const sendRef = useRef<(text: string) => void>(() => {});
 
   const seed = customSeed ?? SEEDS[entryType];
 
@@ -160,50 +166,98 @@ export default function Page() {
   if (step === "conversation") {
     const liveSignals = deriveSignals(liveMessages);
     const userTurns = liveMessages.filter((m) => m.role === "user").length;
-    // Reveal signals progressively: 1 after HALO opens, more as user speaks.
-    const signalCount =
-      userTurns === 0 ? 1 : userTurns === 1 ? 4 : liveSignals.length;
+    const showSignals = userTurns > 0;
+
+    function handleConvSend() {
+      const t = convInput.trim();
+      if (!t || convBusy) return;
+      sendRef.current(t);
+      setConvInput("");
+    }
+
+    function handleConvKey(e: React.KeyboardEvent<HTMLTextAreaElement>) {
+      if (e.key === "Enter" && !e.shiftKey) { e.preventDefault(); handleConvSend(); }
+    }
 
     return (
-      <main className="relative z-10 flex min-h-[100dvh] flex-col px-6 pt-[max(2.25rem,env(safe-area-inset-top))] pb-[max(2.5rem,env(safe-area-inset-bottom))]">
-        <button
-          type="button"
-          onClick={() => setStep("entry")}
-          aria-label="Back"
-          className="-ml-1 mb-5 inline-flex h-9 w-9 items-center justify-center text-[22px] text-ink2"
-        >
-          ←
-        </button>
-
-        <HALOConversation
-          seed={seed}
-          preset={presetTalk}
-          onTurnsShown={setTurns}
-          onComplete={() => setTalkDone(true)}
-          onMessages={setLiveMessages}
-          onGenerateCard={goToResult}
-        />
-
-        <div className="mt-7">
-          <MemorySignalsPanel signals={liveSignals} count={signalCount} />
-        </div>
-
-        <div className="mt-auto pt-7">
+      <div className="halo-conv-shell">
+        {/* ── Header ── */}
+        <header className="halo-conv-header">
           <button
             type="button"
-            onClick={goToResult}
-            disabled={(liveMessages.filter((m) => m.role === "user").length < 2 && !talkDone) || extracting}
-            className="halo-cta halo-cta-primary w-full"
-          >
-            {extracting ? "Preserving your words..." : "Create my Moment Card"}
-          </button>
+            onClick={() => setStep("entry")}
+            aria-label="Back"
+            className="halo-conv-back"
+          >←</button>
+          <span className="halo-conv-title">H A L O</span>
+          <XiaomanAvatar size={34} mood={convBusy ? "thinking" : "idle"} />
+        </header>
+
+        {/* ── Scrollable chat + signals ── */}
+        <div className="halo-conv-body">
+          <HALOConversation
+            seed={seed}
+            preset={presetTalk}
+            renderInput={false}
+            showHeader={false}
+            onTurnsShown={setTurns}
+            onComplete={() => setTalkDone(true)}
+            onMessages={setLiveMessages}
+            onGenerateCard={goToResult}
+            onRegisterSend={(fn) => { sendRef.current = fn; }}
+            onBusyChange={setConvBusy}
+          />
+
+          {showSignals && (
+            <div className="halo-conv-signals">
+              <MemorySignalsPanel signals={liveSignals} />
+            </div>
+          )}
+        </div>
+
+        {/* ── Pinned footer: input + draft CTA ── */}
+        <div className="halo-conv-footer">
+          <div className="halo-conv-input-row">
+            <textarea
+              className="halo-input halo-conv-textarea"
+              rows={1}
+              placeholder="Tell HALO what you remember..."
+              value={convInput}
+              onChange={(e) => setConvInput(e.target.value)}
+              onKeyDown={handleConvKey}
+              disabled={convBusy}
+            />
+            <button
+              type="button"
+              className="halo-conv-send"
+              onClick={handleConvSend}
+              disabled={convBusy || !convInput.trim()}
+            >Send</button>
+          </div>
+
+          <div className="halo-conv-draft">
+            <span className="halo-conv-draft__spark">✦</span>
+            <div className="halo-conv-draft__text">
+              <p className="halo-conv-draft__title">A Moment Card is forming</p>
+              <p className="halo-conv-draft__sub">Keep going, or create a draft now.</p>
+            </div>
+            <button
+              type="button"
+              className="halo-conv-draft__btn"
+              onClick={goToResult}
+              disabled={extracting}
+            >
+              {extracting ? "Preserving…" : "Create draft card"}
+            </button>
+          </div>
+
           {extractError && (
-            <p className="mt-2 text-center font-mono text-[10px] uppercase tracking-[0.22em] text-faint">
+            <p className="text-center font-mono text-[10px] uppercase tracking-[0.22em] text-faint">
               Using offline card · {extractError}
             </p>
           )}
         </div>
-      </main>
+      </div>
     );
   }
 
