@@ -40,7 +40,7 @@ function NavCards()   { return <svg width="22" height="22" viewBox="0 0 24 24" f
 function NavConnect() { return <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.7" strokeLinecap="round" strokeLinejoin="round"><circle cx="8" cy="7" r="3"/><circle cx="16" cy="17" r="3"/><path d="M8 10v4a4 4 0 0 0 4 4h.5"/></svg>; }
 function NavProfile() { return <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.7" strokeLinecap="round" strokeLinejoin="round"><circle cx="12" cy="8" r="4"/><path d="M4 20c0-4 3.6-7 8-7s8 3 8 7"/></svg>; }
 
-// ── Data ─────────────────────────────────────────────────────────────────────
+// ── Entry card data ───────────────────────────────────────────────────────────
 
 type Entry = { type: EntryType; title: string; sub: string; icon: React.ReactNode };
 
@@ -58,146 +58,154 @@ const NAV_TABS = [
   { label: "Profile",     Icon: NavProfile, active: false },
 ];
 
-// ── Memory Map — pure HTML/SVG component ─────────────────────────────────────
-// viewBox: 320 × 290 (matches the container's intended rendered size in px)
-// All node and card positions are defined in these coordinates.
-// The SVG is absolutely positioned behind all HTML nodes so lines appear under chips.
+// ── Memory Map — pure HTML/SVG, no image ─────────────────────────────────────
+//
+// Layout coordinate system: viewBox "0 0 320 300"
+// The container is 100% wide × 300px tall (position: relative).
+// All nodes use `left` (never `right`) to avoid TS union issues.
+//
+//  Node positions (left, top, width=116, height=38):
+//   tl: (4,   10)  → centre (62, 29)
+//   tr: (200, 10)  → centre (258, 29)
+//   ml: (4,  131)  → centre (62, 150)
+//   bl: (10, 236)  → centre (68, 255)
+//   br: (200,236)  → centre (258, 255)
+//
+//  Centre card: left=82, top=108, w=156, h=84 → centre (160,150)
+//  Card connection points:
+//   top-L:  (110, 108)   top-R:  (210, 108)
+//   left-C: ( 82, 150)
+//   bot-L:  (110, 192)   bot-R:  (210, 192)
 
-/*
-  Layout grid (320 × 290):
-  ┌─────────────────────────────────────┐
-  │ [tl chip]            [tr chip]      │
-  │                                     │
-  │          [centre card]              │
-  │                                     │
-  │ [ml chip]                           │
-  │            [bl chip]  [br chip]     │
-  └─────────────────────────────────────┘
-*/
+const AMBER = "#c9a05a";
+const DOT_R = 3.5;
 
-// node chip anchor points (top-left corner of chip, for absolute CSS)
-const NODES = [
-  { key: "tl", label: "A place I keep\nreturning to",        top:  14, left:   6, cx:  66, cy:  30 },
-  { key: "tr", label: "The first meal\nthat felt like home", top:  14, right:  6, cx: 248, cy:  30 },
-  { key: "ml", label: "Calling my mother\nafter I arrived",  top: 124, left:   6, cx:  66, cy: 140 },
-  { key: "bl", label: "The night I\nalmost gave up",         top: 224, left:  18, cx:  78, cy: 240 },
-  { key: "br", label: "The day the city\nfelt familiar",     top: 224, right:  6, cx: 248, cy: 240 },
-] as const;
+type NodeDef = { key: string; label: string; left: number; top: number; cx: number; cy: number };
 
-// centre card geometry (used by SVG paths and the HTML card absolutely)
-const CARD = { top: 104, left: 88, w: 144, h: 80 };
-
-// SVG connection lines: each is a quadratic bezier from card-edge to node centre
-const LINES = [
-  // card top-centre → tl node centre
-  { d: `M ${CARD.left + CARD.w * 0.3},${CARD.top} Q ${CARD.left - 10},${CARD.top - 36} 66,30` },
-  // card top-centre → tr node centre
-  { d: `M ${CARD.left + CARD.w * 0.7},${CARD.top} Q ${CARD.left + CARD.w + 10},${CARD.top - 36} 248,30` },
-  // card left-centre → ml node centre
-  { d: `M ${CARD.left},${CARD.top + CARD.h * 0.5} Q ${CARD.left - 30},${CARD.top + CARD.h * 0.5} 66,140` },
-  // card bottom-left → bl node centre
-  { d: `M ${CARD.left + CARD.w * 0.3},${CARD.top + CARD.h} Q ${CARD.left - 10},${CARD.top + CARD.h + 36} 78,240` },
-  // card bottom-right → br node centre
-  { d: `M ${CARD.left + CARD.w * 0.7},${CARD.top + CARD.h} Q ${CARD.left + CARD.w + 10},${CARD.top + CARD.h + 36} 248,240` },
+const NODES: NodeDef[] = [
+  { key: "tl", label: "A place I keep\nreturning to",          left:   4, top:  10, cx:  62, cy:  29 },
+  { key: "tr", label: "The first meal\nthat felt like home",   left: 200, top:  10, cx: 258, cy:  29 },
+  { key: "ml", label: "Calling my mother\nafter I arrived",    left:   4, top: 131, cx:  62, cy: 150 },
+  { key: "bl", label: "The night I\nalmost gave up",           left:  10, top: 236, cx:  68, cy: 255 },
+  { key: "br", label: "The day the city\nfelt familiar",       left: 200, top: 236, cx: 258, cy: 255 },
 ];
 
-// dot positions: one at each node centre + one at each card-edge start
-const CARD_DOTS = [
-  { x: CARD.left + CARD.w * 0.3,  y: CARD.top },
-  { x: CARD.left + CARD.w * 0.7,  y: CARD.top },
-  { x: CARD.left,                  y: CARD.top + CARD.h * 0.5 },
-  { x: CARD.left + CARD.w * 0.3,  y: CARD.top + CARD.h },
-  { x: CARD.left + CARD.w * 0.7,  y: CARD.top + CARD.h },
+// Bezier path from card border point to node centre
+const PATHS = [
+  { from: { x: 110, y: 108 }, to: { cx:  62, cy:  29 }, cp: { x:  86, y:  68 } },  // → tl
+  { from: { x: 210, y: 108 }, to: { cx: 258, cy:  29 }, cp: { x: 234, y:  68 } },  // → tr
+  { from: { x:  82, y: 150 }, to: { cx:  62, cy: 150 }, cp: { x:  72, y: 150 } },  // → ml (flat)
+  { from: { x: 110, y: 192 }, to: { cx:  68, cy: 255 }, cp: { x:  89, y: 224 } },  // → bl
+  { from: { x: 210, y: 192 }, to: { cx: 258, cy: 255 }, cp: { x: 234, y: 224 } },  // → br
 ];
 
 function MemoryMap() {
   return (
-    <div
-      aria-hidden
-      style={{ position: "relative", width: "100%", height: 290, userSelect: "none" }}
-    >
-      {/* ── SVG connection lines (behind all HTML elements) ── */}
+    <div style={{ position: "relative", width: "100%", height: 300 }}>
+
+      {/* ── SVG layer — always behind HTML elements ── */}
       <svg
-        viewBox="0 0 320 290"
+        viewBox="0 0 320 300"
         preserveAspectRatio="none"
         aria-hidden
-        style={{ position: "absolute", inset: 0, width: "100%", height: "100%", pointerEvents: "none", zIndex: 0 }}
+        style={{
+          position: "absolute", inset: 0,
+          width: "100%", height: "100%",
+          pointerEvents: "none", zIndex: 0,
+        }}
       >
-        {/* amber connection paths */}
-        {LINES.map((l, i) => (
-          <path key={i} d={l.d} fill="none" stroke="#c9a05a" strokeWidth="1.2" strokeDasharray="0" opacity="0.55" />
+        {/* connection lines */}
+        {PATHS.map((p, i) => (
+          <path
+            key={i}
+            d={`M ${p.from.x},${p.from.y} Q ${p.cp.x},${p.cp.y} ${p.to.cx},${p.to.cy}`}
+            fill="none"
+            stroke={AMBER}
+            strokeWidth="1.25"
+            opacity="0.6"
+          />
         ))}
-        {/* dots at card border exits */}
-        {CARD_DOTS.map((p, i) => (
-          <circle key={i} cx={p.x} cy={p.y} r="3" fill="#c9a05a" opacity="0.7" />
+        {/* dots at card border exit points */}
+        {PATHS.map((p, i) => (
+          <circle key={`cd-${i}`} cx={p.from.x} cy={p.from.y} r={DOT_R} fill={AMBER} opacity="0.75" />
         ))}
-        {/* dots at node centres */}
+        {/* dots at node entry points */}
         {NODES.map((n) => (
-          <circle key={n.key} cx={n.cx} cy={n.cy} r="3" fill="#c9a05a" opacity="0.7" />
+          <circle key={`nd-${n.key}`} cx={n.cx} cy={n.cy} r={DOT_R} fill={AMBER} opacity="0.75" />
         ))}
       </svg>
 
       {/* ── Centre moment card ── */}
-      <div
-        style={{
-          position: "absolute",
-          top: CARD.top,
-          left: "50%",
-          transform: "translateX(-50%)",
-          width: CARD.w,
-          display: "flex",
-          gap: 8,
-          background: "#fbfaf6",
-          border: "1px solid #d8cbb8",
-          borderRadius: 10,
-          padding: "8px 10px",
-          boxShadow: "0 3px 14px rgba(0,0,0,0.09)",
-          zIndex: 2,
-        }}
-      >
+      <div style={{
+        position: "absolute",
+        left: 82, top: 108,
+        width: 156, height: 84,
+        display: "flex",
+        gap: 8,
+        background: "#fbfaf6",
+        border: "1px solid #d8cbb8",
+        borderRadius: 10,
+        padding: "8px 10px",
+        boxShadow: "0 3px 16px rgba(0,0,0,0.10)",
+        zIndex: 2,
+      }}>
         {/* thumbnail placeholder */}
-        <div style={{ flexShrink: 0, width: 44, height: 52, borderRadius: 6, background: "#ede8de", border: "1px solid #d8cbb8" }} />
-        <div style={{ display: "flex", flexDirection: "column", gap: 2, minWidth: 0 }}>
-          <span style={{ fontFamily: "var(--font-display)", fontSize: 13, color: "#1a1814", lineHeight: 1.25, display: "block" }}>
+        <div style={{
+          flexShrink: 0, width: 48, height: 60,
+          borderRadius: 7,
+          background: "linear-gradient(145deg, #ede8de, #ddd8cd)",
+          border: "1px solid #d0c9bc",
+        }} />
+        <div style={{ display: "flex", flexDirection: "column", gap: 3, minWidth: 0, paddingTop: 1 }}>
+          <span style={{
+            fontFamily: "var(--font-display)",
+            fontSize: 12.5,
+            color: "#1a1814",
+            lineHeight: 1.25,
+            display: "block",
+          }}>
             The First Morning<br />in Singapore
           </span>
-          <span style={{ fontSize: 9, fontWeight: 700, color: "#9b5443", background: "rgba(155,84,67,0.10)", borderRadius: 4, padding: "1px 5px", width: "fit-content", letterSpacing: "0.03em" }}>
+          <span style={{
+            fontSize: 9,
+            fontWeight: 700,
+            color: "#9b5443",
+            background: "rgba(155,84,67,0.11)",
+            borderRadius: 4,
+            padding: "1px 6px",
+            width: "fit-content",
+            letterSpacing: "0.02em",
+          }}>
             Starting Over
           </span>
-          <span style={{ fontSize: 9, color: "#a8a29b", marginTop: 1 }}>
+          <span style={{ fontSize: 9, color: "#a8a29b", lineHeight: 1.3 }}>
             • First kept moment
           </span>
         </div>
       </div>
 
       {/* ── Surrounding node chips ── */}
-      {NODES.map((n) => {
-        const style: React.CSSProperties = {
+      {NODES.map((n) => (
+        <span key={n.key} style={{
           position: "absolute",
+          left: n.left,
           top: n.top,
-          display: "flex",
-          alignItems: "center",
-          gap: 5,
-          background: "rgba(251,250,246,0.92)",
+          width: 116,
+          display: "block",
+          background: "rgba(251,250,246,0.95)",
           border: "1px solid #d8cbb8",
           borderRadius: 20,
-          padding: "4px 9px",
-          fontSize: 10,
+          padding: "5px 10px",
+          fontSize: 10.5,
           color: "#5a554c",
-          lineHeight: 1.3,
+          lineHeight: 1.35,
           whiteSpace: "pre-line",
           zIndex: 2,
-          maxWidth: 118,
-        };
-        if ("right" in n) {
-          style.right = (n as { right: number }).right;
-        } else {
-          style.left = (n as { left: number }).left;
-        }
-        return (
-          <span key={n.key} style={style}>{n.label}</span>
-        );
-      })}
+          boxShadow: "0 1px 4px rgba(0,0,0,0.06)",
+        }}>
+          {n.label}
+        </span>
+      ))}
     </div>
   );
 }
@@ -210,8 +218,7 @@ export function HomeHero({ onPick }: { onPick: (type: EntryType) => void }) {
 
       {/* ── HERO ─────────────────────────────────────────────── */}
       <section className="hh-hero">
-
-        {/* Background: floating cards + baked-in HALO orb. pointer-events-none. */}
+        {/* Background image: floating photo cards + baked-in HALO orb. pointer-events-none. */}
         <div aria-hidden className="hh-hero-bg pointer-events-none">
           <Image
             src="/assets/home-hero-bg.png"
@@ -222,11 +229,11 @@ export function HomeHero({ onPick }: { onPick: (type: EntryType) => void }) {
             priority
             unoptimized
           />
-          {/* readability gradient on the left so text stays clear */}
+          {/* Left-side gradient keeps text readable against the bright image */}
           <div className="hh-hero-grad" />
         </div>
 
-        {/* Top bar: wordmark + menu */}
+        {/* Top bar */}
         <div className="hh-topbar">
           <span className="hh-wordmark">HALO</span>
           <button type="button" aria-label="Menu" className="hh-menu-btn">
@@ -238,7 +245,7 @@ export function HomeHero({ onPick }: { onPick: (type: EntryType) => void }) {
           </button>
         </div>
 
-        {/* Real selectable headline — no extra mascot overlay (baked into bg image) */}
+        {/* Real selectable headline — no extra mascot overlay; orb is in the bg image */}
         <div className="hh-copy">
           <h1 className="hh-h1">Hello.<br />I see your halo.</h1>
           <p className="hh-sub">Map the moments<br />that made you.</p>
@@ -269,17 +276,16 @@ export function HomeHero({ onPick }: { onPick: (type: EntryType) => void }) {
         ))}
       </div>
 
-      {/* ── MAP PREVIEW — pure HTML/SVG, no screenshot ─────────── */}
+      {/* ── MAP PREVIEW — pure HTML + SVG, zero images ────────── */}
       <section className="hh-map-panel">
         <p className="hh-map-eyebrow">YOUR MAP IS WAITING TO BE LIT</p>
 
-        {/* Real component: SVG lines + HTML text chips */}
+        {/* MemoryMap: all text is real HTML, all lines are SVG paths */}
         <MemoryMap />
 
-        {/* zone labels */}
         <div className="hh-map-zones">
-          <span>Belonging</span>
-          <span>Things I Carried</span>
+          <span>BELONGING</span>
+          <span>THINGS I CARRIED</span>
         </div>
       </section>
 
