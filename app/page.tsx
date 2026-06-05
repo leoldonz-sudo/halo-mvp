@@ -124,19 +124,19 @@ export default function SitePage() {
         className="official-panel official-panel--closing"
         aria-label="Begin with One Moment"
       >
-        <Image
-          src="/site/closing.png"
-          alt="Two loved ones sitting together in warm morning light."
-          width={1672}
-          height={941}
-          sizes="100vw"
-          className="official-panel__image official-panel__image--cover"
-          unoptimized
-        />
-        <div className="official-closing-cta">
-          <Link className="official-button" href="/demo">
-            Try HALO
-          </Link>
+        <div style={{ position: "relative", width: "100%", overflow: "hidden" }}>
+          {/* eslint-disable-next-line @next/next/no-img-element */}
+          <img
+            src="/site/closing.png"
+            alt="Two loved ones sitting together in warm morning light."
+            style={{ display: "block", width: "100%", height: "auto" }}
+          />
+          <Link
+            href="/demo"
+            aria-label="Try demo"
+            className="absolute z-50 cursor-pointer pointer-events-auto bg-red-500/20 border border-red-500"
+            style={{ left: "5%", top: "68%", width: "14%", height: "8%" }}
+          />
         </div>
       </section>
 
