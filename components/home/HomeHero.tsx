@@ -2,7 +2,6 @@
 
 import Image from "next/image";
 import type { EntryType } from "@/lib/types";
-import { XiaomanAvatar } from "@/components/XiaomanAvatar";
 
 // ── Entry card icons ─────────────────────────────────────────────────────────
 
@@ -51,14 +50,6 @@ const ENTRIES: Entry[] = [
   { type: "guided",       title: "Let HALO guide me",          sub: "For when you don't know where to start.",                       icon: <IconSparkle /> },
 ];
 
-const MAP_NODES = [
-  { label: "A place I keep returning to",      pos: "top-[14%] left-[4%]" },
-  { label: "The first meal that felt like home", pos: "top-[14%] right-[3%]" },
-  { label: "Calling my mother after I arrived",  pos: "bottom-[25%] left-[3%]" },
-  { label: "The night I almost gave up",         pos: "bottom-[10%] left-[22%]" },
-  { label: "The day the city felt familiar",     pos: "bottom-[10%] right-[4%]" },
-];
-
 const NAV_TABS = [
   { label: "Home",        Icon: NavHome,    active: true  },
   { label: "Map",         Icon: NavMap,     active: false },
@@ -67,7 +58,151 @@ const NAV_TABS = [
   { label: "Profile",     Icon: NavProfile, active: false },
 ];
 
-// ── Component ────────────────────────────────────────────────────────────────
+// ── Memory Map — pure HTML/SVG component ─────────────────────────────────────
+// viewBox: 320 × 290 (matches the container's intended rendered size in px)
+// All node and card positions are defined in these coordinates.
+// The SVG is absolutely positioned behind all HTML nodes so lines appear under chips.
+
+/*
+  Layout grid (320 × 290):
+  ┌─────────────────────────────────────┐
+  │ [tl chip]            [tr chip]      │
+  │                                     │
+  │          [centre card]              │
+  │                                     │
+  │ [ml chip]                           │
+  │            [bl chip]  [br chip]     │
+  └─────────────────────────────────────┘
+*/
+
+// node chip anchor points (top-left corner of chip, for absolute CSS)
+const NODES = [
+  { key: "tl", label: "A place I keep\nreturning to",        top:  14, left:   6, cx:  66, cy:  30 },
+  { key: "tr", label: "The first meal\nthat felt like home", top:  14, right:  6, cx: 248, cy:  30 },
+  { key: "ml", label: "Calling my mother\nafter I arrived",  top: 124, left:   6, cx:  66, cy: 140 },
+  { key: "bl", label: "The night I\nalmost gave up",         top: 224, left:  18, cx:  78, cy: 240 },
+  { key: "br", label: "The day the city\nfelt familiar",     top: 224, right:  6, cx: 248, cy: 240 },
+] as const;
+
+// centre card geometry (used by SVG paths and the HTML card absolutely)
+const CARD = { top: 104, left: 88, w: 144, h: 80 };
+
+// SVG connection lines: each is a quadratic bezier from card-edge to node centre
+const LINES = [
+  // card top-centre → tl node centre
+  { d: `M ${CARD.left + CARD.w * 0.3},${CARD.top} Q ${CARD.left - 10},${CARD.top - 36} 66,30` },
+  // card top-centre → tr node centre
+  { d: `M ${CARD.left + CARD.w * 0.7},${CARD.top} Q ${CARD.left + CARD.w + 10},${CARD.top - 36} 248,30` },
+  // card left-centre → ml node centre
+  { d: `M ${CARD.left},${CARD.top + CARD.h * 0.5} Q ${CARD.left - 30},${CARD.top + CARD.h * 0.5} 66,140` },
+  // card bottom-left → bl node centre
+  { d: `M ${CARD.left + CARD.w * 0.3},${CARD.top + CARD.h} Q ${CARD.left - 10},${CARD.top + CARD.h + 36} 78,240` },
+  // card bottom-right → br node centre
+  { d: `M ${CARD.left + CARD.w * 0.7},${CARD.top + CARD.h} Q ${CARD.left + CARD.w + 10},${CARD.top + CARD.h + 36} 248,240` },
+];
+
+// dot positions: one at each node centre + one at each card-edge start
+const CARD_DOTS = [
+  { x: CARD.left + CARD.w * 0.3,  y: CARD.top },
+  { x: CARD.left + CARD.w * 0.7,  y: CARD.top },
+  { x: CARD.left,                  y: CARD.top + CARD.h * 0.5 },
+  { x: CARD.left + CARD.w * 0.3,  y: CARD.top + CARD.h },
+  { x: CARD.left + CARD.w * 0.7,  y: CARD.top + CARD.h },
+];
+
+function MemoryMap() {
+  return (
+    <div
+      aria-hidden
+      style={{ position: "relative", width: "100%", height: 290, userSelect: "none" }}
+    >
+      {/* ── SVG connection lines (behind all HTML elements) ── */}
+      <svg
+        viewBox="0 0 320 290"
+        preserveAspectRatio="none"
+        aria-hidden
+        style={{ position: "absolute", inset: 0, width: "100%", height: "100%", pointerEvents: "none", zIndex: 0 }}
+      >
+        {/* amber connection paths */}
+        {LINES.map((l, i) => (
+          <path key={i} d={l.d} fill="none" stroke="#c9a05a" strokeWidth="1.2" strokeDasharray="0" opacity="0.55" />
+        ))}
+        {/* dots at card border exits */}
+        {CARD_DOTS.map((p, i) => (
+          <circle key={i} cx={p.x} cy={p.y} r="3" fill="#c9a05a" opacity="0.7" />
+        ))}
+        {/* dots at node centres */}
+        {NODES.map((n) => (
+          <circle key={n.key} cx={n.cx} cy={n.cy} r="3" fill="#c9a05a" opacity="0.7" />
+        ))}
+      </svg>
+
+      {/* ── Centre moment card ── */}
+      <div
+        style={{
+          position: "absolute",
+          top: CARD.top,
+          left: "50%",
+          transform: "translateX(-50%)",
+          width: CARD.w,
+          display: "flex",
+          gap: 8,
+          background: "#fbfaf6",
+          border: "1px solid #d8cbb8",
+          borderRadius: 10,
+          padding: "8px 10px",
+          boxShadow: "0 3px 14px rgba(0,0,0,0.09)",
+          zIndex: 2,
+        }}
+      >
+        {/* thumbnail placeholder */}
+        <div style={{ flexShrink: 0, width: 44, height: 52, borderRadius: 6, background: "#ede8de", border: "1px solid #d8cbb8" }} />
+        <div style={{ display: "flex", flexDirection: "column", gap: 2, minWidth: 0 }}>
+          <span style={{ fontFamily: "var(--font-display)", fontSize: 13, color: "#1a1814", lineHeight: 1.25, display: "block" }}>
+            The First Morning<br />in Singapore
+          </span>
+          <span style={{ fontSize: 9, fontWeight: 700, color: "#9b5443", background: "rgba(155,84,67,0.10)", borderRadius: 4, padding: "1px 5px", width: "fit-content", letterSpacing: "0.03em" }}>
+            Starting Over
+          </span>
+          <span style={{ fontSize: 9, color: "#a8a29b", marginTop: 1 }}>
+            • First kept moment
+          </span>
+        </div>
+      </div>
+
+      {/* ── Surrounding node chips ── */}
+      {NODES.map((n) => {
+        const style: React.CSSProperties = {
+          position: "absolute",
+          top: n.top,
+          display: "flex",
+          alignItems: "center",
+          gap: 5,
+          background: "rgba(251,250,246,0.92)",
+          border: "1px solid #d8cbb8",
+          borderRadius: 20,
+          padding: "4px 9px",
+          fontSize: 10,
+          color: "#5a554c",
+          lineHeight: 1.3,
+          whiteSpace: "pre-line",
+          zIndex: 2,
+          maxWidth: 118,
+        };
+        if ("right" in n) {
+          style.right = (n as { right: number }).right;
+        } else {
+          style.left = (n as { left: number }).left;
+        }
+        return (
+          <span key={n.key} style={style}>{n.label}</span>
+        );
+      })}
+    </div>
+  );
+}
+
+// ── Main component ────────────────────────────────────────────────────────────
 
 export function HomeHero({ onPick }: { onPick: (type: EntryType) => void }) {
   return (
@@ -76,7 +211,7 @@ export function HomeHero({ onPick }: { onPick: (type: EntryType) => void }) {
       {/* ── HERO ─────────────────────────────────────────────── */}
       <section className="hh-hero">
 
-        {/* Background: floating cards + amber glow (pointer-events-none) */}
+        {/* Background: floating cards + baked-in HALO orb. pointer-events-none. */}
         <div aria-hidden className="hh-hero-bg pointer-events-none">
           <Image
             src="/assets/home-hero-bg.png"
@@ -87,7 +222,7 @@ export function HomeHero({ onPick }: { onPick: (type: EntryType) => void }) {
             priority
             unoptimized
           />
-          {/* left-side readability gradient */}
+          {/* readability gradient on the left so text stays clear */}
           <div className="hh-hero-grad" />
         </div>
 
@@ -103,12 +238,7 @@ export function HomeHero({ onPick }: { onPick: (type: EntryType) => void }) {
           </button>
         </div>
 
-        {/* HALO sun mascot — decorative, right side */}
-        <div aria-hidden className="hh-mascot pointer-events-none">
-          <XiaomanAvatar size={68} mood="idle" />
-        </div>
-
-        {/* Real selectable headline text */}
+        {/* Real selectable headline — no extra mascot overlay (baked into bg image) */}
         <div className="hh-copy">
           <h1 className="hh-h1">Hello.<br />I see your halo.</h1>
           <p className="hh-sub">Map the moments<br />that made you.</p>
@@ -139,36 +269,12 @@ export function HomeHero({ onPick }: { onPick: (type: EntryType) => void }) {
         ))}
       </div>
 
-      {/* ── MAP PREVIEW PANEL ─────────────────────────────────── */}
+      {/* ── MAP PREVIEW — pure HTML/SVG, no screenshot ─────────── */}
       <section className="hh-map-panel">
         <p className="hh-map-eyebrow">YOUR MAP IS WAITING TO BE LIT</p>
 
-        <div className="hh-map-visual">
-          {/* real map image as base */}
-          <Image
-            src="/assets/home-map.png"
-            alt="Memory map preview"
-            fill
-            sizes="390px"
-            className="object-contain object-center"
-            unoptimized
-          />
-
-          {/* surrounding memory nodes overlaid on map */}
-          {MAP_NODES.map(({ label, pos }) => (
-            <span key={label} className={`hh-map-node ${pos}`}>{label}</span>
-          ))}
-
-          {/* centre moment card */}
-          <div className="hh-map-card">
-            <div className="hh-map-card-thumb" />
-            <div className="hh-map-card-info">
-              <span className="hh-map-card-title">The First Morning<br />in Singapore</span>
-              <span className="hh-map-card-tag">Starting Over</span>
-              <span className="hh-map-card-dot">• First kept moment</span>
-            </div>
-          </div>
-        </div>
+        {/* Real component: SVG lines + HTML text chips */}
+        <MemoryMap />
 
         {/* zone labels */}
         <div className="hh-map-zones">
