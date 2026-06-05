@@ -69,7 +69,7 @@ export function HomeHero({ onPick }: { onPick: (type: EntryType) => void }) {
         {/* LAYER 0 — full-screen background, pointer-events-none */}
         <div aria-hidden className="hs-bg">
           <Image
-            src="/assets/home-hero-bg.png"
+            src="/assets/hero-bg.png"
             alt=""
             fill
             sizes="430px"
