@@ -23,16 +23,18 @@ export default function SitePage() {
             priority
             unoptimized
           />
-          {/* Invisible hit areas over baked-in image buttons */}
+          {/* DEBUG: transparent red hit areas — remove bg/border after confirming position */}
           <Link
             href="/demo"
             aria-label="Map the Moments That Made Me"
             className="official-hit official-hit--primary"
+            style={{ background: "rgba(239,68,68,0.2)", border: "1px solid rgb(239,68,68)" }}
           />
           <a
             href="#how-it-works"
             aria-label="See How HALO Works"
             className="official-hit official-hit--secondary"
+            style={{ background: "rgba(239,68,68,0.2)", border: "1px solid rgb(239,68,68)" }}
           />
         </div>
       </section>
