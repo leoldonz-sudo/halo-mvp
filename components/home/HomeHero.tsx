@@ -6,14 +6,15 @@ import type { EntryType } from "@/lib/types";
 // ── Icons ────────────────────────────────────────────────────────────────────
 
 function IconPin() {
-  return <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.6" strokeLinecap="round" strokeLinejoin="round"><path d="M12 2C8.13 2 5 5.13 5 9c0 5.25 7 13 7 13s7-7.75 7-13c0-3.87-3.13-7-7-7z"/><circle cx="12" cy="9" r="2.5"/></svg>;
+  return <svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.6" strokeLinecap="round" strokeLinejoin="round"><path d="M12 2C8.13 2 5 5.13 5 9c0 5.25 7 13 7 13s7-7.75 7-13c0-3.87-3.13-7-7-7z"/><circle cx="12" cy="9" r="2.5"/></svg>;
 }
 function IconPhoto() {
-  return <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.6" strokeLinecap="round" strokeLinejoin="round"><rect x="3" y="3" width="18" height="18" rx="2"/><circle cx="8.5" cy="8.5" r="1.5"/><polyline points="21 15 16 10 5 21"/></svg>;
+  return <svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.6" strokeLinecap="round" strokeLinejoin="round"><rect x="3" y="3" width="18" height="18" rx="2"/><circle cx="8.5" cy="8.5" r="1.5"/><polyline points="21 15 16 10 5 21"/></svg>;
 }
 function IconSparkle() {
-  return <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.6" strokeLinecap="round" strokeLinejoin="round"><path d="M12 2l2.4 7.4H22l-6.2 4.5 2.4 7.4L12 17l-6.2 4.3 2.4-7.4L2 9.4h7.6z"/></svg>;
+  return <svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.6" strokeLinecap="round" strokeLinejoin="round"><path d="M12 2l2.4 7.4H22l-6.2 4.5 2.4 7.4L12 17l-6.2 4.3 2.4-7.4L2 9.4h7.6z"/></svg>;
 }
+
 function NavHome()    { return <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.7" strokeLinecap="round" strokeLinejoin="round"><path d="M3 9.5L12 3l9 6.5V20a1 1 0 0 1-1 1H4a1 1 0 0 1-1-1V9.5z"/><path d="M9 21V12h6v9"/></svg>; }
 function NavMap()     { return <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.7" strokeLinecap="round" strokeLinejoin="round"><path d="M3 7l6-3 6 3 6-3v13l-6 3-6-3-6 3V7z"/><line x1="9" y1="4" x2="9" y2="17"/><line x1="15" y1="7" x2="15" y2="20"/></svg>; }
 function NavCards()   { return <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.7" strokeLinecap="round" strokeLinejoin="round"><rect x="2" y="5" width="16" height="13" rx="2"/><path d="M6 3h14a2 2 0 0 1 2 2v13"/></svg>; }
@@ -38,61 +39,31 @@ const NAV_TABS = [
   { label: "Profile",     Icon: NavProfile, active: false },
 ];
 
-// ── Compact map preview (pure HTML + SVG, no images) ─────────────────────────
-//
-// viewBox 320 × 160  |  container: 100% wide × 160px tall
-//
-// Centre card: left=88 top=40 w=144 h=70 → centre (160,75)
-// 3 nodes (w=108 h=32):
-//   tl left=4  top=4   cx=58  cy=20
-//   tr left=208 top=4  cx=262 cy=20
-//   bl left=4  top=120 cx=58  cy=136
+// ── Ultra-light map teaser — just 3 amber dots + 2 curved lines ───────────────
+// Purely decorative SVG strip. No cards, no chips, no node labels.
 
-const AMBER = "#c9a05a";
-
-function MapPreview() {
-  // Card border points → node centres
-  const paths = [
-    { d: "M 110,40 Q 84,28 58,20"   },   // top-left node
-    { d: "M 210,40 Q 236,28 262,20" },   // top-right node
-    { d: "M 110,110 Q 84,124 58,136" },  // bottom-left node
-  ];
-  const cardDots  = [{ x: 110, y: 40 }, { x: 210, y: 40 }, { x: 110, y: 110 }];
-  const nodeDots  = [{ x: 58,  y: 20 }, { x: 262, y: 20 }, { x: 58,  y: 136 }];
-  const nodeChips = [
-    { label: "A place I keep\nreturning to",        left:   4, top:   4 },
-    { label: "The first meal\nthat felt like home",  left: 208, top:   4 },
-    { label: "The day the city\nfelt familiar",      left:   4, top:  120 },
-  ];
-
+function MapTeaser() {
+  const A = "#c9a05a";
   return (
-    <div style={{ position: "relative", width: "100%", height: 160 }}>
-      {/* SVG lines — z-index 0, behind all HTML */}
-      <svg
-        viewBox="0 0 320 160"
-        preserveAspectRatio="none"
-        aria-hidden
-        style={{ position: "absolute", inset: 0, width: "100%", height: "100%", pointerEvents: "none", zIndex: 0 }}
-      >
-        {paths.map((p, i)     => <path key={i} d={p.d} fill="none" stroke={AMBER} strokeWidth="1.2" opacity="0.6" />)}
-        {cardDots.map((d, i)  => <circle key={`c${i}`} cx={d.x} cy={d.y} r="3" fill={AMBER} opacity="0.7" />)}
-        {nodeDots.map((d, i)  => <circle key={`n${i}`} cx={d.x} cy={d.y} r="3" fill={AMBER} opacity="0.7" />)}
-      </svg>
-
-      {/* Centre moment card */}
-      <div style={{ position: "absolute", left: 88, top: 40, width: 144, height: 70, display: "flex", gap: 7, background: "#fbfaf6", border: "1px solid #d8cbb8", borderRadius: 9, padding: "7px 8px", boxShadow: "0 2px 12px rgba(0,0,0,0.10)", zIndex: 2 }}>
-        <div style={{ flexShrink: 0, width: 40, height: 52, borderRadius: 6, background: "linear-gradient(145deg,#ede8de,#ddd8cd)", border: "1px solid #d0c9bc" }} />
-        <div style={{ display: "flex", flexDirection: "column", gap: 3, minWidth: 0, paddingTop: 1 }}>
-          <span style={{ fontFamily: "var(--font-display)", fontSize: 11.5, color: "#1a1814", lineHeight: 1.25 }}>The First Morning<br />in Singapore</span>
-          <span style={{ fontSize: 8.5, fontWeight: 700, color: "#9b5443", background: "rgba(155,84,67,0.11)", borderRadius: 3, padding: "1px 5px", width: "fit-content" }}>Starting Over</span>
-          <span style={{ fontSize: 8.5, color: "#a8a29b" }}>• First kept moment</span>
-        </div>
+    <div className="hs-teaser">
+      <p className="hs-teaser-label">YOUR MAP IS WAITING TO BE LIT</p>
+      <div className="hs-teaser-visual" aria-hidden>
+        {/* 3 dots connected by 2 gentle curves, horizontally centred */}
+        <svg viewBox="0 0 160 20" preserveAspectRatio="xMidYMid meet"
+          style={{ width: "100%", maxWidth: 160, height: 20, display: "block", margin: "0 auto" }}>
+          {/* left dot → centre dot */}
+          <path d="M 16,10 Q 48,4 80,10" fill="none" stroke={A} strokeWidth="1" opacity="0.6" />
+          {/* centre dot → right dot */}
+          <path d="M 80,10 Q 112,16 144,10" fill="none" stroke={A} strokeWidth="1" opacity="0.6" />
+          {/* filled left dot */}
+          <circle cx="16" cy="10" r="3.5" fill={A} opacity="0.8" />
+          {/* filled centre dot */}
+          <circle cx="80" cy="10" r="3.5" fill={A} opacity="0.8" />
+          {/* hollow right dot */}
+          <circle cx="144" cy="10" r="3" fill="none" stroke={A} strokeWidth="1.2" opacity="0.6" />
+        </svg>
       </div>
-
-      {/* Node chips */}
-      {nodeChips.map((n) => (
-        <span key={n.label} style={{ position: "absolute", left: n.left, top: n.top, width: 108, display: "block", background: "rgba(251,250,246,0.95)", border: "1px solid #d8cbb8", borderRadius: 16, padding: "4px 8px", fontSize: 10, color: "#5a554c", lineHeight: 1.3, whiteSpace: "pre-line", zIndex: 2, boxShadow: "0 1px 4px rgba(0,0,0,0.06)" }}>{n.label}</span>
-      ))}
+      <p className="hs-teaser-caption">One kept moment can begin a quiet map.</p>
     </div>
   );
 }
@@ -102,14 +73,9 @@ function MapPreview() {
 export function HomeHero({ onPick }: { onPick: (type: EntryType) => void }) {
   return (
     <>
-      {/*
-        ONE full-screen container.
-        Background image fills the entire screen behind everything.
-        Content is a flex column overlaid on top.
-      */}
       <div className="hs-screen">
 
-        {/* ── LAYER 0: full-screen background ── */}
+        {/* LAYER 0 — full-screen background, pointer-events-none */}
         <div aria-hidden className="hs-bg">
           <Image
             src="/assets/home-hero-bg.png"
@@ -120,11 +86,10 @@ export function HomeHero({ onPick }: { onPick: (type: EntryType) => void }) {
             priority
             unoptimized
           />
-          {/* gradient keeps left text legible, fades toward bottom so cards sit clearly */}
           <div className="hs-bg-grad" />
         </div>
 
-        {/* ── LAYER 1: all visible content, flex column ── */}
+        {/* LAYER 1 — flex column, all UI content */}
         <div className="hs-content">
 
           {/* Top bar */}
@@ -139,20 +104,29 @@ export function HomeHero({ onPick }: { onPick: (type: EntryType) => void }) {
             </button>
           </div>
 
-          {/* Hero headline — left-aligned, uppercase serif */}
+          {/* Hero copy — left column, right half is background visual */}
           <div className="hs-copy">
-            <h1 className="hs-h1">Hello.<br />I see your halo.</h1>
+            <h1 className="hs-h1">Hello.<br />I see your<br />halo.</h1>
             <p className="hs-sub">Map the moments that made you.</p>
-            <p className="hs-body">Start with something you kept,<br />something you never captured,<br />or a gentle question from HALO.</p>
+            <p className="hs-body">
+              Start with something you kept,<br />
+              something you never captured,<br />
+              or a gentle question from HALO.
+            </p>
           </div>
 
-          {/* Flex spacer — pushes cards toward lower screen */}
-          <div style={{ flex: 1, minHeight: 16, maxHeight: 80 }} />
+          {/* Controlled spacer — lets hero breathe without leaving huge gap */}
+          <div className="hs-spacer" />
 
-          {/* Three entry cards — fixed 72px height each */}
+          {/* Three entry cards — fixed height, uniform */}
           <div className="hs-cards">
             {ENTRIES.map((e) => (
-              <button key={e.type} type="button" onClick={() => onPick(e.type)} className="hs-card">
+              <button
+                key={e.type}
+                type="button"
+                onClick={() => onPick(e.type)}
+                className="hs-card"
+              >
                 <span className="hs-card-icon">{e.icon}</span>
                 <span className="hs-card-body">
                   <span className="hs-card-title">{e.title}</span>
@@ -163,13 +137,22 @@ export function HomeHero({ onPick }: { onPick: (type: EntryType) => void }) {
             ))}
           </div>
 
-        </div>{/* /hs-content */}
-      </div>{/* /hs-screen */}
+          {/* Ultra-light map teaser — just a hint, not a section */}
+          <MapTeaser />
 
-      {/* ── LAYER 2: fixed bottom nav ── */}
+        </div>
+      </div>
+
+      {/* LAYER 2 — fixed bottom nav */}
       <nav className="hs-nav" aria-label="Main navigation">
         {NAV_TABS.map(({ label, Icon, active }) => (
-          <button key={label} type="button" aria-label={label} aria-current={active ? "page" : undefined} className={`hs-nav-tab${active ? " hs-nav-tab--active" : ""}`}>
+          <button
+            key={label}
+            type="button"
+            aria-label={label}
+            aria-current={active ? "page" : undefined}
+            className={`hs-nav-tab${active ? " hs-nav-tab--active" : ""}`}
+          >
             <Icon />
             <span className="hs-nav-label">{label}</span>
           </button>
