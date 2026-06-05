@@ -1844,8 +1844,8 @@ body {
   cursor: pointer;
 }
 
-/* ── Hero copy ── */
-.hs-copy { max-width: 52%; }
+/* ── Hero copy ── wider so headline reads in one line near the orb */
+.hs-copy { max-width: 72%; }
 
 .hs-h1 {
   font-family: var(--font-display);
