@@ -89,8 +89,8 @@ export function HomeHero({ onPick }: { onPick: (type: EntryType) => void }) {
             <Image
               src="/xiaoman-node.png"
               alt="小满"
-              width={56}
-              height={56}
+              width={90}
+              height={90}
               priority
               unoptimized
             />
