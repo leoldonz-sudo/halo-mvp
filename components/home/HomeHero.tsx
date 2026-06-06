@@ -73,7 +73,8 @@ export function HomeHero({ onPick }: { onPick: (type: EntryType) => void }) {
             alt=""
             fill
             sizes="430px"
-            className="object-cover object-right-top"
+            className="object-cover"
+            style={{ objectPosition: '70% 15%' }}
             priority
             unoptimized
           />
@@ -83,9 +84,16 @@ export function HomeHero({ onPick }: { onPick: (type: EntryType) => void }) {
         {/* LAYER 1 — flex column, all UI content */}
         <div className="hs-content">
 
-          {/* Xiaoman node — top-right corner */}
+          {/* Xiaoman — pinned to constellation node top-right */}
           <div className="hs-xiaoman-node" aria-hidden>
-            <XiaomanAvatar size={40} mood="idle" />
+            <Image
+              src="/xiaoman-node.png"
+              alt="小满"
+              width={56}
+              height={56}
+              priority
+              unoptimized
+            />
           </div>
 
           {/* Top bar */}
@@ -127,6 +135,7 @@ export function HomeHero({ onPick }: { onPick: (type: EntryType) => void }) {
           </div>
 
           <MapTeaser />
+          <div className="hs-flex-fill" />
 
         </div>
       </div>
