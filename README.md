@@ -173,45 +173,6 @@ The MVP is built to demonstrate the product logic, emotional experience, and cor
 
 It is not yet a full production product.
 
----
-
-## Quick Start
-
-```bash
-cp .env.example .env.local
-# Add OPENAI_API_KEY in .env.local if using server-side AI features
-
-npm install
-npm run dev
-
-# Open http://localhost:3000
-```
-
-If `OPENAI_API_KEY` is not configured:
-
-* `/api/chat` will fall back to a warm default conversation flow
-* `/api/generate-card` will fall back to a generic Moment Card template
-* the full demo flow can still run
-
----
-
-## Local Mobile Testing
-
-To test on a phone connected to the same local network:
-
-```bash
-ipconfig getifaddr en0
-# Then open http://<local-ip>:3000 on your phone
-```
-
-Example:
-
-```bash
-http://192.168.x.x:3000
-```
-
----
-
 ## Main User Flow
 
 ```text
