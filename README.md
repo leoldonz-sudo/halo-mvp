@@ -5,9 +5,11 @@
 The world sees where you arrived.
 HALO helps you remember the quiet moments that shaped who you became — and share them with someone who matters.
 
+
 ## One-line Summary
 
 HALO helps users start from one small memory, talk it through with Xiaoman, generate a structured Moment Card, save it into a growing Memory Map, and share it as a gentle invitation for connection.
+
 
 ## Why HALO
 
@@ -225,8 +227,6 @@ HALO is a **memory elicitation, structuring, and connection product** built arou
 HALO MVP is a mobile-first web prototype built to demonstrate the core product journey from memory input to Moment Card, Memory Map, and shareable connection.
 
 ### Current Stack
-
-> Please update this section if the actual codebase uses a different stack.
 
 * **Frontend:** React / Next.js
 * **Styling:** CSS / Tailwind CSS
