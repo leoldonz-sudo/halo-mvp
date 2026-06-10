@@ -5,13 +5,9 @@
 The world sees where you arrived.
 HALO helps you remember the quiet moments that shaped who you became — and share them with someone who matters.
 
----
-
 ## One-line Summary
 
 HALO helps users start from one small memory, talk it through with Xiaoman, generate a structured Moment Card, save it into a growing Memory Map, and share it as a gentle invitation for connection.
-
----
 
 ## Why HALO
 
@@ -37,8 +33,6 @@ That memory asset can then become:
 3. part of a Memory Map
 4. a gentle invitation for someone else to respond
 
----
-
 ## Core User Flow
 
 ```text
@@ -61,13 +55,10 @@ Share card or attach a gentle question
 Invite another person to respond with their own memory
 ```
 
----
-
 ## Core Product Loops
 
 HALO MVP is built around three connected loops.
 
----
 
 ### Loop 1: Create a Moment Card
 
@@ -87,8 +78,6 @@ Memory Signal Extraction
 Moment Card
 ```
 
----
-
 ### Loop 2: Build a Memory Map
 
 1. User opens the Memory Map.
@@ -105,8 +94,6 @@ Memory Map
   ↓
 Patterns / Themes / Arcs
 ```
-
----
 
 ### Loop 3: Connect Through a Moment Card
 
@@ -130,7 +117,6 @@ This loop turns HALO from a private memory tool into a lightweight connection pr
 HALO does not only help users remember themselves.
 It helps one memory become an opening for another person to respond.
 
----
 
 ## Key Product Concepts
 
@@ -153,7 +139,6 @@ Each Moment Card may include:
 The goal is not to over-beautify the memory.
 The goal is to preserve what felt real.
 
----
 
 ### Memory Map
 
@@ -172,7 +157,6 @@ Over time, repeated cards can reveal:
 
 The Memory Map helps users see not only what happened, but how they became who they are.
 
----
 
 ### Xiaoman
 
@@ -191,8 +175,6 @@ Xiaoman should:
 * guide memory into structure
 * keep the experience emotionally safe
 * help transform a memory into a card, map node, or shareable invitation
-
----
 
 ### Connect / Share
 
@@ -215,7 +197,6 @@ Example share questions:
 
 This makes memory social without turning it into social media.
 
----
 
 ## What HALO Is Not
 
@@ -239,8 +220,6 @@ HALO is a **memory elicitation, structuring, and connection product** built arou
 * relationship invitation
 * human connection
 
----
-
 ## Technical Architecture
 
 HALO MVP is a mobile-first web prototype built to demonstrate the core product journey from memory input to Moment Card, Memory Map, and shareable connection.
@@ -256,8 +235,6 @@ HALO MVP is a mobile-first web prototype built to demonstrate the core product j
 * **Storage:** local state / localStorage / mock data
 * **AI Layer:** structured memory prompt logic, currently partially simulated in the MVP
 * **Target Platform:** mobile-first H5 experience
-
----
 
 ## System Flow
 
@@ -283,8 +260,6 @@ Recipient memory response
 Relationship memory thread
 ```
 
----
-
 ## AI Memory Structuring Logic
 
 HALO’s AI logic is designed around a structured memory-processing pipeline rather than open-ended chat.
@@ -305,8 +280,6 @@ Memory Map Connection
 Connection Prompt Generation
 ```
 
----
-
 ### 1. Memory Cue
 
 The user starts with one small fragment:
@@ -317,7 +290,6 @@ The user starts with one small fragment:
 * a moment no one saw
 * a prompt from Xiaoman
 
----
 
 ### 2. Gentle Follow-up
 
@@ -331,7 +303,6 @@ Example question types:
 * What part of that moment still feels important?
 * Who else was connected to this memory?
 
----
 
 ### 3. Signal Extraction
 
@@ -348,7 +319,6 @@ Possible signals include:
 * future-facing reflection
 * possible connection question
 
----
 
 ### 4. Moment Card Generation
 
@@ -356,7 +326,6 @@ The extracted signals are converted into a Moment Card.
 
 The Moment Card keeps the memory grounded in the user’s original words while adding structure, meaning, and a restrained reflective line.
 
----
 
 ### 5. Memory Map Connection
 
@@ -371,7 +340,6 @@ Future versions may connect cards through:
 * recurring patterns
 * relationship arcs
 
----
 
 ### 6. Connection Prompt Generation
 
@@ -387,8 +355,6 @@ Example output:
   "question": "What was your version of this moment?"
 }
 ```
-
----
 
 ## Moment Card Schema
 
@@ -430,8 +396,6 @@ Example output:
 }
 ```
 
----
-
 ## Memory Map Data Model
 
 Each saved Moment Card can become a node in the Memory Map.
@@ -458,8 +422,6 @@ type MemoryEdge = {
   relationType: "theme" | "emotion" | "person" | "time" | "pattern";
 };
 ```
-
----
 
 ## Connect / Share Data Model
 
@@ -507,8 +469,6 @@ type RelationshipMemoryThread = {
 };
 ```
 
----
-
 ## Current Implementation Status
 
 | Feature                    | Status                          | Notes                                                                 |
@@ -528,7 +488,6 @@ type RelationshipMemoryThread = {
 | Long-term memory graph     | Planned                         | Future backend and graph logic required                               |
 | Privacy-first storage      | Planned                         | Requires production-level backend and security design                 |
 
----
 
 ## Current MVP Scope
 
@@ -551,7 +510,6 @@ The main goal is to prove that one small memory fragment can become:
 4. a shareable connection invitation
 5. the beginning of a relationship memory thread
 
----
 
 ## Getting Started
 
@@ -580,7 +538,6 @@ npm run dev
 http://localhost:3000
 ```
 
----
 
 ## Environment Variables
 
@@ -592,7 +549,6 @@ OPENAI_API_KEY=your_api_key_here
 
 If the current demo version uses scripted prompts or mock data, no external AI API is required.
 
----
 
 ## Repository Structure
 
@@ -624,7 +580,6 @@ halo-mvp/
   package.json
 ```
 
----
 
 ## Suggested Demo Script
 
@@ -640,7 +595,6 @@ halo-mvp/
 10. Explain how the card can be shared directly or sent with a gentle question.
 11. Show how future versions can let another person respond with their own memory.
 
----
 
 ## Design Principles
 
@@ -663,8 +617,7 @@ HALO should not feel like:
 * a social media template
 * a sentimental poster
 * a public posting platform
-
----
+  
 
 ## Product Positioning
 
@@ -685,7 +638,6 @@ HALO remembers every step that brought you here.
 
 Map the Moments That Made Me
 
----
 
 ## Current Limitations
 
@@ -704,7 +656,6 @@ Current limitations include:
 
 These limitations define the next development priorities.
 
----
 
 ## Future Roadmap
 
@@ -724,7 +675,6 @@ Next versions may include:
 * memory pattern detection
 * exportable keepsake cards or memory books
 
----
 
 ## Why This Matters
 
@@ -734,7 +684,6 @@ Instead of optimizing productivity, speed, or output, HALO uses AI to help peopl
 
 The long-term vision is to build a memory system that helps people see where they have been, understand the quiet moments that shaped them, and open deeper conversations with the people who matter.
 
----
 
 ## Project Status
 
