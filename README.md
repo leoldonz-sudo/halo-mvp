@@ -1,297 +1,238 @@
 # HALO MVP
 
-**HALO is an AI memory product that helps people remember the unseen steps behind who they became.**
+**HALO is an AI memory product that turns overlooked life moments into structured Moment Cards, a personal Memory Map, and gentle invitations for connection.**
 
 The world sees where you arrived.
-HALO helps you see and remember the quiet moments that brought you here.
+HALO helps you remember the quiet moments that shaped who you became — and share them with someone who matters.
 
-HALO turns small life moments into **Moment Cards**, connects them into personal **Memory Maps**, and lets users share a card or gentle question with someone they care about.
+- **Brand line:** Every unseen moment carries its own halo.
+- **CTA:** Map the Moments That Made Me
 
----
-
-## What HALO Does
-
-Many people are seen through achievements, roles, and labels.
-
-HALO is designed for the parts of life that are often left unseen: the small moments, quiet struggles, old objects, forgotten photos, and private memories that shaped who someone became.
-
-Instead of asking users to write a full life story, HALO starts with one small fragment.
-
-A user can begin from:
-
-* a moment no one saw
-* a photo they kept
-* an object with memory attached
-* a gentle question from HALO
-
-HALO then helps the user turn that fragment into a structured memory asset.
+This document reflects what is *actually implemented* in this repository. The product source of truth lives in the Obsidian vault (`01HALO/0610HALO最新真理.md`).
 
 ---
 
-## Core Product Loop
+## What this MVP does
 
-This MVP focuses on two short closed loops:
+It runs one complete, working product loop:
 
-### Loop 1: Create a Moment Card
+```
+Memory  →  Xiaoman  →  Moment Card  →  Memory Map  →  Share  →  Recipient Response  →  Thread
+```
 
-1. Start from a photo, object, or memory prompt
-2. Talk it through with Xiaoman
-3. Generate a Moment Card
-4. Save it into the Memory Map
+A user starts from one small memory, talks it through with Xiaoman, generates a structured **Moment Card**, saves it to a **Memory Map**, opens it, shares it as a gentle question, and a recipient adds *their* version — weaving a **relationship memory thread**.
 
-### Loop 2: Return to the Memory Map
+### Product philosophy in the data
 
-1. Open the Memory Map
-2. View saved Moment Cards
-3. Open card details
-4. Continue with another memory or return home
+Every Moment Card is *anchored in the past, grounded in the present, oriented toward becoming*. The card schema makes those three layers first-class fields:
 
----
-
-## Key Concepts
-
-### Moment Card
-
-A **Moment Card** is a small memory asset generated from one life fragment.
-
-Each card may include:
-
-* the user’s original quote
-* concrete details from the memory
-* emotional tone
-* a restrained Halo Line
-* related theme
-* connection to the Memory Map
-
-The goal is not to beautify the memory too much.
-The goal is to preserve what felt real.
+1. **Past Anchor** — the concrete memory (`pastAnchor`, `originalQuote`, `concreteMemory`)
+2. **Present Meaning** — what it means now (`presentMeaning`, `emotionSignal`, `valueSignal`, `hiddenStrength`)
+3. **Future Orientation** — a gentle direction for becoming (`futureOrientation`, `reflectionQuestion`)
 
 ---
 
-### Memory Map
+## Current stack
 
-A **Memory Map** connects saved Moment Cards into a personal map of becoming.
+| Layer | Choice |
+| --- | --- |
+| Framework | Next.js 14.2 (App Router, React Server + Client Components) |
+| Language | TypeScript (strict) |
+| UI | React 18, Tailwind CSS 3.4, CSS custom properties (warm paper design system) |
+| AI | OpenAI Chat Completions (`gpt-4o-mini` by default), server-side only |
+| Persistence | `localStorage` (browser) — no database in this MVP |
+| Target | Mobile-first H5 (390×844 / 375×812) |
+| Deploy | Vercel |
 
-Each saved card becomes a **Moment Node**.
-
-Over time, repeated moments form:
-
-* quiet themes
-* emotional patterns
-* memory arcs
-* relationship threads
-
-The Memory Map helps users see not only what happened, but how they became who they are.
-
----
-
-### Xiaoman
-
-**Xiaoman** is HALO’s warm memory companion.
-
-Xiaoman does not behave like a generic chatbot.
-It asks restrained, gentle questions and helps users stay close to the original memory.
-
-Xiaoman’s role is to:
-
-* help users start from a small fragment
-* avoid overwhelming life-story prompts
-* preserve the user’s original words
-* guide memory into structure
-* keep the experience emotionally safe
+There is **no backend database and no auth**. Persistence is deliberately the simplest reliable option (`localStorage`) so the full loop is demonstrable and technically explainable without infra.
 
 ---
 
-### Relationship Invitation
+## Architecture
 
-A saved Moment Card can also become a relationship invitation.
+```
+app/
+  page.tsx                 # marketing landing (image-led 5 panels)
+  demo/page.tsx            # /demo → re-exports the landing
+  demo/start/page.tsx      # interactive flow: home → entry → conversation → result
+  map/page.tsx             # Memory Map (saved cards as nodes)
+  card/[id]/page.tsx       # Moment Card detail + Share action
+  share/[shareId]/page.tsx # recipient view: card + question + response + thread
+  api/
+    generate-card/route.ts # memory → canonical Moment Card (OpenAI or mock)
+    halo/chat/route.ts     # one Xiaoman conversation turn (OpenAI)
+    halo/extract/route.ts  # transcript → demo card/signals (OpenAI)
+components/
+  flow/                    # conversation, result, demo MomentCard
+  halo/MomentCardView.tsx  # canonical 3-layer card (Past / Present / Future)
+  home/, entry/, site/     # landing + entry surfaces, Xiaoman avatar
+lib/
+  types.ts                 # in-memory demo "seed" schema (existing demo)
+  demoData.ts              # frozen demo seeds + scripted fallback transcripts
+  haloPrompt.ts            # Xiaoman chat + extract system prompts
+  halo/                    # the real persisted loop:
+    types.ts               #   canonical data models
+    mockCard.ts            #   deterministic, isomorphic card builder
+    cardPrompt.ts          #   generate-card system prompt
+    store.ts               #   localStorage CRUD (cards/nodes/invitations/responses/threads)
+```
 
-Users can share a card as-is, or send it with a gentle question to someone they care about.
+**Data flow when a card is created** (`app/demo/start/page.tsx → persistCanonicalCard`):
 
-This allows the other person to add their own version of the memory.
-
-HALO starts with the self, but it can open into relationships.
-
----
-
-## What HALO Is Not
-
-HALO is not:
-
-* a journaling app
-* a memoir writing tool
-* a therapy product
-* a generic chatbot
-* a simple camera app
-* a database of old photos
-
-HALO is a **memory elicitation and structuring engine** designed around:
-
-* restraint
-* original words
-* emotional safety
-* memory structure
-* human connection
-
----
-
-## Product Positioning
-
-**One-line summary**
-
-HALO turns unseen life moments into Moment Cards and Memory Maps that can be shared with someone you care about.
-
-**Brand line**
-
-Every unseen moment carries its own halo.
-
-**Hero line**
-
-The world sees where you arrived.
-HALO remembers every step that brought you here.
-
-**CTA**
-
-Map the Moments That Made Me
+```
+transcript → POST /api/generate-card → MomentCard JSON → store.saveCard()
+          → localStorage (card + auto-created MemoryNode)
+          → /card/[id], /map, /share/[shareId] read it back
+```
 
 ---
 
-## Current MVP Scope
+## API route: `/api/generate-card`
 
-This MVP is a mobile-first H5 prototype.
+```
+POST /api/generate-card
+Content-Type: application/json
 
-The current version focuses on:
+{
+  "memoryText": "I waited alone at the hospital at 2am while my father was in surgery...",
+  "followUpAnswers": ["I stared at the vending machine light and told myself to hold on."],
+  "entryLabel": "A moment I never captured"      // optional
+}
+```
 
-* memory entry
-* Xiaoman-guided conversation
-* Moment Card generation
-* Memory Map preview
-* saved card detail page
-* basic return flow
+**Response:**
 
-The MVP is built to demonstrate the product logic, emotional experience, and core interaction loop.
+```json
+{
+  "card": {
+    "id": "card_...",
+    "title": "Waiting Alone at the Hospital",
+    "pastAnchor": "...", "originalQuote": "...", "concreteMemory": "...",
+    "presentMeaning": "...", "emotionSignal": "...", "valueSignal": "...", "hiddenStrength": "...",
+    "futureOrientation": "...", "reflectionQuestion": "...",
+    "haloLine": "You found a way to stay present in the silence.",
+    "theme": "solitude, resilience",
+    "shareQuestion": "What was your experience like during a similar wait?",
+    "createdAt": "2026-06-10T04:18:15.400Z"
+  },
+  "source": "openai"          // "openai" | "mock" | "mock-fallback"
+}
+```
 
-It is not yet a full production product.
+- If `OPENAI_API_KEY` is set, the route calls the model with a structured prompt (`lib/halo/cardPrompt.ts`) and coerces the result into a complete card.
+- If the key is missing **or** the call fails, it falls back to a **deterministic mock** (`lib/halo/mockCard.ts`) built from the user's own words, so the demo always returns a real, saveable card.
+
+The two existing routes `/api/halo/chat` and `/api/halo/extract` power the live Xiaoman conversation and require a key; the client falls back to a scripted seed transcript when they are unavailable.
 
 ---
 
-## Quick Start
+## Data models (`lib/halo/types.ts`)
+
+`MomentCard`, `MemoryNode`, `MemoryEdge`, `ShareInvitation`, `SharedMemoryResponse`, `RelationshipMemoryThread`.
+
+```ts
+type MomentCard = {
+  id: string; title: string;
+  pastAnchor: string; originalQuote: string; concreteMemory: string;       // Past
+  presentMeaning: string; emotionSignal: string;                           // Present
+  valueSignal: string; hiddenStrength: string;
+  futureOrientation: string; reflectionQuestion: string;                   // Future
+  haloLine: string; theme: string; shareQuestion?: string; createdAt: string;
+};
+
+type MemoryNode = { id; cardId; title; theme; x; y; createdAt };           // x/y: 0–1 map position
+type ShareInvitation = { id; cardId; shareMode; question?; ...; createdAt };
+type SharedMemoryResponse = { id; invitationId; responseText; relatedCardId; responderName?; createdAt };
+type RelationshipMemoryThread = { id; invitationId; participantIds[]; cardIds[]; responseIds[]; theme?; createdAt };
+```
+
+`MemoryEdge` is defined for future graph work but not yet generated.
+
+---
+
+## Implemented features
+
+| Feature | Status | Notes |
+| --- | --- | --- |
+| Mobile-first landing + demo entry | ✅ Implemented | `/`, `/demo`, `/demo/start` |
+| Xiaoman guided conversation | ✅ Implemented | live OpenAI (`/api/halo/chat`); scripted seed fallback without a key |
+| Moment Card generation | ✅ Implemented | real route `/api/generate-card`, OpenAI **or** deterministic mock |
+| Save Moment Card | ✅ Implemented | `localStorage` via `lib/halo/store.ts` |
+| Memory Map | ✅ Implemented | `/map` — saved cards as nodes; node → detail |
+| Card detail (Past/Present/Future) | ✅ Implemented | `/card/[id]` |
+| Share / gentle question | ✅ Implemented | `/share/[shareId]` from a `ShareInvitation` |
+| Recipient response | ✅ Implemented | response form on the share page |
+| Relationship memory thread | ✅ Implemented | original memory + responses shown together |
+| MemoryEdge / graph clustering | ⏳ Planned | type defined; no edges generated |
+| Accounts / real cross-user sharing | ⏳ Planned | requires a backend |
+
+---
+
+## Current limitations
+
+- **`localStorage` only.** Saved cards, invitations, responses, and threads live in **one browser on one device**. In the demo, the "recipient" of a share is the same browser; in production this route would be opened by another person against a shared backend.
+- **No accounts, no auth, no server persistence.**
+- **The Memory Map is positional, not a real graph** — nodes are placed deterministically; there is no edge/clustering logic yet.
+- **Without `OPENAI_API_KEY`,** Xiaoman uses scripted seed transcripts and cards come from the deterministic mock (still a complete, real loop — just not model-generated).
+- This is an early-stage MVP focused on a clear, working core loop, not production infrastructure.
+
+---
+
+## Run locally
 
 ```bash
-cp .env.example .env.local
-# Add OPENAI_API_KEY in .env.local if using server-side AI features
-
 npm install
-npm run dev
 
-# Open http://localhost:3000
+# Optional — enables live OpenAI Moment Cards + Xiaoman:
+cp .env.example .env.local
+# then add your key to .env.local
+
+npm run dev          # http://localhost:3000
 ```
 
-If `OPENAI_API_KEY` is not configured:
-
-* `/api/chat` will fall back to a warm default conversation flow
-* `/api/generate-card` will fall back to a generic Moment Card template
-* the full demo flow can still run
-
----
-
-## Local Mobile Testing
-
-To test on a phone connected to the same local network:
+Production build (used to verify this MVP):
 
 ```bash
-ipconfig getifaddr en0
-# Then open http://<local-ip>:3000 on your phone
+npm run build
+npm start            # serves the optimized build on :3000
 ```
 
-Example:
+### Local mobile testing
 
 ```bash
-http://192.168.x.x:3000
+ipconfig getifaddr en0          # then open http://<local-ip>:3000 on your phone
 ```
 
 ---
 
-## Main User Flow
+## Environment variables
 
-```text
-Home
-  ↓
-Choose an entry
-  ↓
-Talk with Xiaoman
-  ↓
-Generate Moment Card
-  ↓
-Save to Memory Map
-  ↓
-Open Memory Map
-  ↓
-View card detail
-  ↓
-Continue or return home
-```
+| Variable | Required | Default | Purpose |
+| --- | --- | --- | --- |
+| `OPENAI_API_KEY` | No | — | Enables live Moment Card generation + Xiaoman. Without it, deterministic mock + scripted fallback are used. Server-side only. |
+| `OPENAI_MODEL` | No | `gpt-4o-mini` | Model used by the API routes. |
+| `OPENAI_BASE_URL` | No | OpenAI default | Override for OpenAI-compatible gateways. |
+
+The key never reaches the browser — it is read only inside `app/api/**` route handlers.
 
 ---
 
-## Suggested Demo Script
+## Demo path (≈90 seconds)
 
-1. Open HALO homepage
-2. Start from one small moment
-3. Talk with Xiaoman
-4. Generate a Moment Card
-5. Save it into the Memory Map
-6. Show how the card becomes a node
-7. Explain how cards can later be shared with someone close
-
----
-
-## Design Principles
-
-HALO should feel:
-
-* warm
-* restrained
-* human
-* quiet
-* emotionally safe
-* premium but not cold
-
-HALO should not feel like:
-
-* a SaaS dashboard
-* a productivity app
-* a therapy form
-* a generic chatbot
-* a social media template
-* a sentimental poster
+1. Open `/demo/start`.
+2. Pick an entry (e.g. *A moment I never captured*).
+3. Tell Xiaoman one memory; answer the gentle follow-up.
+4. Tap **Create draft card** → a Moment Card is generated and saved.
+5. Tap **Keep this memory** → **Open this card** (`/card/[id]`).
+6. See the Past / Present / Future structure; tap **Share this moment**.
+7. On the share page (`/share/[shareId]`), add a recipient response.
+8. The **relationship memory thread** shows the original memory and the new response together.
+9. Open **/map** at any time to see every kept moment as a node.
 
 ---
 
-## Future Direction
+## Project status
 
-Next versions may include:
+Early-stage MVP for product validation and demo. It proves the core thesis end-to-end:
 
-* shareable Moment Cards
-* gentle question invitations
-* shared Memory Maps between two people
-* family memory threads
-* relationship-based memory arcs
-* exportable keepsake cards or books
-* stronger AI memory signal extraction
-* privacy-first personal memory storage
-
----
-
-## Project Status
-
-This is an early-stage MVP built for product validation and demo purposes.
-
-The current goal is to prove that one small memory fragment can become:
-
-1. a Moment Card
-2. a Memory Node
-3. part of a Memory Map
-4. a possible invitation for deeper connection
-
-HALO begins with one unseen moment, then helps people remember the quiet steps behind who they became.
+> one unseen moment → one Moment Card → one Memory Node → one Memory Map → one gentle invitation → one shared thread

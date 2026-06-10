@@ -1,5 +1,6 @@
 "use client";
 
+import Link from "next/link";
 import { useLayoutEffect, useRef, useState } from "react";
 import type { MemorySeed } from "@/lib/types";
 import { MomentCard } from "./MomentCard";
@@ -32,9 +33,12 @@ function prefersReducedMotion(): boolean {
 export function ResultPage({
   seed,
   onRestart,
+  savedCardId,
 }: {
   seed: MemorySeed;
   onRestart: () => void;
+  /** Durable canonical card id — enables real "Open this card" / Share. */
+  savedCardId?: string;
 }) {
   const [saveState, setSaveState] = useState<SaveState>("preview");
   const [toast, setToast] = useState(false);
@@ -140,22 +144,24 @@ export function ResultPage({
 
       {saveState === "kept" && (
         <div className="mt-6 flex flex-col gap-2.5">
+          {savedCardId && (
+            <Link
+              href={`/card/${savedCardId}`}
+              className="halo-cta halo-cta-primary w-full"
+            >
+              Open this card
+            </Link>
+          )}
+          <Link href="/map" className="halo-cta halo-cta-secondary w-full">
+            Open Memory Map
+          </Link>
           <button
             type="button"
             onClick={onRestart}
-            className="halo-cta halo-cta-primary w-full"
+            className="halo-cta halo-cta-ghost w-full"
           >
             Find another moment
           </button>
-          {share === "closed" && (
-            <button
-              type="button"
-              onClick={() => setShare("choice")}
-              className="halo-cta halo-cta-secondary w-full"
-            >
-              Share with a question
-            </button>
-          )}
         </div>
       )}
 

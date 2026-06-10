@@ -1,24 +1,24 @@
 "use client";
 
+import { useState } from "react";
 import Image from "next/image";
 import type { EntryType } from "@/lib/types";
-import { XiaomanAvatar } from "@/components/XiaomanAvatar";
 
 function MapTeaser() {
-  const G = "#c9a05a";
   return (
-    <div className="hs-teaser">
-      <p className="hs-teaser-label">YOUR MAP IS WAITING TO BE LIT</p>
-      <div className="hs-teaser-visual" aria-hidden>
-        <svg width="120" height="22" viewBox="0 0 120 22">
-          <path d="M 10,11 Q 60,4 110,11" fill="none" stroke={G} strokeWidth="0.9" opacity="0.42"/>
-          <circle cx="10"  cy="11" r="3"   fill={G} opacity="0.65"/>
-          <circle cx="60"  cy="6"  r="2"   fill={G} opacity="0.42"/>
-          <circle cx="110" cy="11" r="2.2" fill="none" stroke={G} strokeWidth="1.1" opacity="0.38"/>
-        </svg>
+    <section className="hs-map-panel" aria-label="Your map is waiting to be lit">
+      <div className="hs-map-visual" aria-hidden>
+        <Image
+          src="/assets/demo-home-map-latest.png"
+          alt=""
+          fill
+          sizes="390px"
+          className="hs-map-image"
+          priority
+          unoptimized
+        />
       </div>
-      <p className="hs-teaser-caption">One kept moment can begin a quiet map.</p>
-    </div>
+    </section>
   );
 }
 
@@ -50,110 +50,124 @@ const ENTRIES: Entry[] = [
   { type: "guided",       title: "Let HALO guide me",          sub: "For when you don't know where to start.",                        icon: <IconSparkle /> },
 ];
 
-const NAV_TABS = [
-  { label: "Home",        Icon: NavHome,    active: true  },
-  { label: "Map",         Icon: NavMap,     active: false },
-  { label: "Cards",       Icon: NavCards,   active: false },
-  { label: "Connections", Icon: NavConnect, active: false },
-  { label: "Profile",     Icon: NavProfile, active: false },
+type NavTab = "Home" | "Map" | "Cards" | "Connections" | "Profile";
+
+const NAV_TABS: { label: NavTab; Icon: () => React.ReactNode; image?: string }[] = [
+  { label: "Home",        Icon: NavHome },
+  { label: "Map",         Icon: NavMap,     image: "/assets/demo-tab-map.png" },
+  { label: "Cards",       Icon: NavCards,   image: "/assets/demo-tab-cards.png" },
+  { label: "Connections", Icon: NavConnect, image: "/assets/demo-tab-connections.png" },
+  { label: "Profile",     Icon: NavProfile, image: "/assets/demo-tab-profile.png" },
 ];
 
 
 // ── Component ────────────────────────────────────────────────────────────────
 
 export function HomeHero({ onPick }: { onPick: (type: EntryType) => void }) {
+  const [activeTab, setActiveTab] = useState<NavTab>("Home");
+  const activeTabData = NAV_TABS.find((tab) => tab.label === activeTab);
+
   return (
     <>
-      <div className="hs-screen">
+      <div className={`hs-screen${activeTab !== "Home" ? " hs-screen--static" : ""}`}>
 
-        {/* LAYER 0 — full-screen background, pointer-events-none */}
-        <div aria-hidden className="hs-bg">
-          <Image
-            src="/assets/hero-bg.png"
-            alt=""
-            fill
-            sizes="430px"
-            className="object-cover"
-            style={{ objectPosition: '70% 15%' }}
-            priority
-            unoptimized
-          />
-          <div className="hs-bg-grad" />
-        </div>
+        {activeTab === "Home" ? (
+          <>
+            {/* LAYER 0 — full-screen background, pointer-events-none */}
+            <div aria-hidden className="hs-bg">
+              <Image
+                src="/assets/real-demo-latest-bg.png"
+                alt=""
+                fill
+                sizes="430px"
+                className="object-cover"
+                style={{ objectPosition: "56% 0%" }}
+                priority
+                unoptimized
+              />
+              <div className="hs-bg-grad" />
+            </div>
 
-        {/* LAYER 1 — flex column, all UI content */}
-        <div className="hs-content">
+            {/* LAYER 1 — flex column, all UI content */}
+            <div className="hs-content">
 
-          {/* Xiaoman — pinned to constellation node top-right */}
-          <div className="hs-xiaoman-node" aria-hidden>
-            <Image
-              src="/xiaoman-node.png"
-              alt="小满"
-              width={90}
-              height={90}
-              priority
-              unoptimized
-            />
+              {/* Top bar */}
+              <div className="hs-topbar">
+                <span className="hs-wordmark">HALO</span>
+                <button type="button" aria-label="Menu" className="hs-menu-btn">
+                  <svg width="17" height="12" viewBox="0 0 17 12" fill="none">
+                    <rect width="17" height="2" rx="1" fill="currentColor"/>
+                    <rect y="5" width="17" height="2" rx="1" fill="currentColor"/>
+                    <rect y="10" width="17" height="2" rx="1" fill="currentColor"/>
+                  </svg>
+                </button>
+              </div>
+
+              <div className="hs-copy">
+                <h1 className="hs-h1">Hello,<br /><span>I see your halo.</span></h1>
+                <p className="hs-sub">Map the moments that made you.</p>
+              </div>
+
+              <div className="hs-art-space" />
+
+              <div className="hs-cards">
+                {ENTRIES.map((e) => (
+                  <button
+                    key={e.type}
+                    type="button"
+                    onClick={() => onPick(e.type)}
+                    className="hs-card"
+                  >
+                    <span className="hs-card-icon">{e.icon}</span>
+                    <span className="hs-card-body">
+                      <span className="hs-card-title">{e.title}</span>
+                      <span className="hs-card-sub">{e.sub}</span>
+                    </span>
+                    <span className="hs-card-arrow">→</span>
+                  </button>
+                ))}
+              </div>
+
+              <MapTeaser />
+              <div className="hs-flex-fill" />
+
+            </div>
+          </>
+        ) : (
+          <div className="hs-static-tab" aria-label={`${activeTab} preview`}>
+            {activeTabData?.image && (
+              <Image
+                src={activeTabData.image}
+                alt={`${activeTab} screen preview`}
+                fill
+                sizes="430px"
+                className="hs-static-tab-image"
+                priority={activeTab === "Map"}
+                unoptimized
+              />
+            )}
           </div>
-
-          {/* Top bar */}
-          <div className="hs-topbar">
-            <span className="hs-wordmark">HALO</span>
-            <button type="button" aria-label="Menu" className="hs-menu-btn">
-              <svg width="17" height="12" viewBox="0 0 17 12" fill="none">
-                <rect width="17" height="2" rx="1" fill="currentColor"/>
-                <rect y="5" width="17" height="2" rx="1" fill="currentColor"/>
-                <rect y="10" width="17" height="2" rx="1" fill="currentColor"/>
-              </svg>
-            </button>
-          </div>
-
-          <div className="hs-copy">
-            <h1 className="hs-h1">Hello,<br />I see your halo.</h1>
-            <p className="hs-sub">Map the moments that made you.</p>
-            <p className="hs-body">Start with something you kept,<br />something you never captured,<br />or a gentle question from HALO.</p>
-          </div>
-
-          <div className="hs-spacer" />
-
-          <div className="hs-cards">
-            {ENTRIES.map((e) => (
-              <button
-                key={e.type}
-                type="button"
-                onClick={() => onPick(e.type)}
-                className="hs-card"
-              >
-                <span className="hs-card-icon">{e.icon}</span>
-                <span className="hs-card-body">
-                  <span className="hs-card-title">{e.title}</span>
-                  <span className="hs-card-sub">{e.sub}</span>
-                </span>
-                <span className="hs-card-arrow">→</span>
-              </button>
-            ))}
-          </div>
-
-          <MapTeaser />
-          <div className="hs-flex-fill" />
-
-        </div>
+        )}
       </div>
 
       {/* LAYER 2 — fixed bottom nav */}
       <nav className="hs-nav" aria-label="Main navigation">
-        {NAV_TABS.map(({ label, Icon, active }) => (
+        {NAV_TABS.map(({ label, Icon }) => {
+          const active = activeTab === label;
+          return (
           <button
             key={label}
             type="button"
             aria-label={label}
+            onClick={() => setActiveTab(label)}
             aria-current={active ? "page" : undefined}
             className={`hs-nav-tab${active ? " hs-nav-tab--active" : ""}`}
           >
             <Icon />
             <span className="hs-nav-label">{label}</span>
           </button>
-        ))}
+          );
+        })}
       </nav>
     </>
   );

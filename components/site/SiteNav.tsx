@@ -28,7 +28,7 @@ export function SiteNav() {
         <a href="#memory-map" className="site-nav__link">Memory Map</a>
         <a href="#share-a-moment" className="site-nav__link">Share a moment</a>
       </div>
-      <Link href="/demo" className="site-nav__cta">
+      <Link href="/demo/start" className="site-nav__cta">
         Try HALO →
       </Link>
     </nav>

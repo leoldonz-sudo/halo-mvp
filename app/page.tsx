@@ -45,7 +45,7 @@ export default function SitePage() {
             style={{ left: "82%", top: "4%", width: "10%", height: "5%" }}
           />
           <Link
-            href="/demo"
+            href="/demo/start"
             aria-label="Try HALO"
             className={HIT}
             style={{ left: "91%", top: "3.5%", width: "8%", height: "6%" }}
@@ -53,7 +53,7 @@ export default function SitePage() {
 
           {/* ── Baked-in HERO CTA hit areas ── */}
           <Link
-            href="/demo"
+            href="/demo/start"
             aria-label="Map the Moments That Made Me"
             className={HIT}
             style={{ left: "2.2%", top: "74%", width: "24%", height: "7%" }}
@@ -132,7 +132,7 @@ export default function SitePage() {
             style={{ display: "block", width: "100%", height: "auto" }}
           />
           <Link
-            href="/demo"
+            href="/demo/start"
             aria-label="Try demo"
             className="absolute z-50 cursor-pointer pointer-events-auto"
             style={{ left: "5%", top: "68%", width: "14%", height: "8%" }}
