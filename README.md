@@ -40,11 +40,11 @@ Every Moment Card is *anchored in the past, grounded in the present, oriented to
 | Language | TypeScript (strict) |
 | UI | React 18, Tailwind CSS 3.4, CSS custom properties (warm paper design system) |
 | AI | OpenAI Chat Completions (`gpt-4o-mini` by default), server-side only |
-| Persistence | `localStorage` (browser) — no database in this MVP |
+| Persistence | `localStorage` for Moment Cards + Memory Map; **Supabase (Postgres)** for the cross-browser Share path |
 | Target | Mobile-first H5 (390×844 / 375×812) |
 | Deploy | Vercel |
 
-There is **no backend database and no auth**. Persistence is deliberately the simplest reliable option (`localStorage`) so the full loop is demonstrable and technically explainable without infra.
+Moment Cards and the Memory Map stay in `localStorage` (no auth, no server round-trip). Only the **Share path** is server-backed: when Supabase is configured, share invitations + recipient responses live in Postgres so a link works across browsers and devices. Without Supabase, Share falls back to `localStorage` (same browser only).
 
 ---
 
@@ -60,6 +60,8 @@ app/
   share/[shareId]/page.tsx # recipient view: card + question + response + thread
   api/
     generate-card/route.ts # memory → canonical Moment Card (OpenAI or mock)
+    share/route.ts         # POST → create Supabase share invitation
+    share/[shareId]/route.ts # GET invitation+responses, POST a response
     halo/chat/route.ts     # one Xiaoman conversation turn (OpenAI)
     halo/extract/route.ts  # transcript → demo card/signals (OpenAI)
 components/
@@ -70,11 +72,13 @@ lib/
   types.ts                 # in-memory demo "seed" schema (existing demo)
   demoData.ts              # frozen demo seeds + scripted fallback transcripts
   haloPrompt.ts            # Xiaoman chat + extract system prompts
+  supabase/server.ts       # server-only service-role client (Share path)
   halo/                    # the real persisted loop:
     types.ts               #   canonical data models
     mockCard.ts            #   deterministic, isomorphic card builder
     cardPrompt.ts          #   generate-card system prompt
     store.ts               #   localStorage CRUD (cards/nodes/invitations/responses/threads)
+supabase/migrations/       # SQL: share_invitations + shared_responses
 ```
 
 **Data flow when a card is created** (`app/demo/start/page.tsx → persistCanonicalCard`):
@@ -126,6 +130,26 @@ The two existing routes `/api/halo/chat` and `/api/halo/extract` power the live 
 
 ---
 
+## Share path (Supabase) — cross-browser
+
+The Share path is the one server-backed surface, so a link works in **another person's browser**:
+
+```
+/card/[id]  ──Share──▶  POST /api/share        ──▶ getSupabaseAdmin() ──▶ share_invitations (card jsonb snapshot)
+                              │
+                              ▼  returns shareId (UUID)
+/share/[shareId] ──load──▶  GET  /api/share/[shareId]  ──▶ invitation + responses
+                 ──reply─▶  POST /api/share/[shareId]   ──▶ shared_responses ──▶ updated thread
+```
+
+- **Server-side only.** The browser talks only to `/api/share/*`; the `SUPABASE_SERVICE_ROLE_KEY` is read only in `lib/supabase/server.ts` + the route handlers and is never sent to the client.
+- **Security.** Both tables have RLS enabled with **no policies** (anon/authenticated get zero rows); the service role bypasses RLS. The `shareId` (UUID) is the capability token — no accounts needed. Schema: `supabase/migrations/0001_share_path.sql`.
+- **Graceful fallback.** If Supabase env vars are missing (or a call fails), every share API returns `503 {configured:false}` / errors, and the client falls back to the existing `localStorage` Share behavior. Legacy `localStorage` share links (`inv_…`) still resolve same-browser.
+
+Apply the migration once (Supabase SQL Editor or `psql`) before using the live Share path.
+
+---
+
 ## Data models (`lib/halo/types.ts`)
 
 `MomentCard`, `MemoryNode`, `MemoryEdge`, `ShareInvitation`, `SharedMemoryResponse`, `RelationshipMemoryThread`.
@@ -160,18 +184,20 @@ type RelationshipMemoryThread = { id; invitationId; participantIds[]; cardIds[];
 | Save Moment Card | ✅ Implemented | `localStorage` via `lib/halo/store.ts` |
 | Memory Map | ✅ Implemented | `/map` — saved cards as nodes; node → detail |
 | Card detail (Past/Present/Future) | ✅ Implemented | `/card/[id]` |
-| Share / gentle question | ✅ Implemented | `/share/[shareId]` from a `ShareInvitation` |
-| Recipient response | ✅ Implemented | response form on the share page |
-| Relationship memory thread | ✅ Implemented | original memory + responses shown together |
+| Share / gentle question | ✅ Implemented | `/share/[shareId]`; **cross-browser via Supabase**, localStorage fallback |
+| Recipient response | ✅ Implemented | saved to Supabase (or localStorage fallback) |
+| Relationship memory thread | ✅ Implemented | original memory + responses, persisted server-side |
+| Cards + Memory Map server sync | ⏳ Planned | still localStorage; only the Share path is server-backed |
 | MemoryEdge / graph clustering | ⏳ Planned | type defined; no edges generated |
-| Accounts / real cross-user sharing | ⏳ Planned | requires a backend |
+| Accounts / auth | ⏳ Planned | share links are unguessable tokens; no accounts yet |
 
 ---
 
 ## Current limitations
 
-- **`localStorage` only.** Saved cards, invitations, responses, and threads live in **one browser on one device**. In the demo, the "recipient" of a share is the same browser; in production this route would be opened by another person against a shared backend.
-- **No accounts, no auth, no server persistence.**
+- **Moment Cards + Memory Map are `localStorage` only** — they live in one browser on one device and don't sync across devices yet. (The **Share path is cross-browser** via Supabase when configured.)
+- **No accounts / auth.** Share links are unguessable UUID capability tokens; anyone with the link can view the card and add a response.
+- **Without Supabase env vars**, Share degrades to localStorage (same-browser only) — the pre-Supabase behavior.
 - **The Memory Map is positional, not a real graph** — nodes are placed deterministically; there is no edge/clustering logic yet.
 - **Without `OPENAI_API_KEY`,** Xiaoman uses scripted seed transcripts and cards come from the deterministic mock (still a complete, real loop — just not model-generated).
 - This is an early-stage MVP focused on a clear, working core loop, not production infrastructure.
@@ -212,8 +238,12 @@ ipconfig getifaddr en0          # then open http://<local-ip>:3000 on your phone
 | `OPENAI_API_KEY` | No | — | Enables live Moment Card generation + Xiaoman. Without it, deterministic mock + scripted fallback are used. Server-side only. |
 | `OPENAI_MODEL` | No | `gpt-4o-mini` | Model used by the API routes. |
 | `OPENAI_BASE_URL` | No | OpenAI default | Override for OpenAI-compatible gateways. |
+| `SUPABASE_URL` | No | — | Enables cross-browser Share. Without it, Share uses localStorage. |
+| `SUPABASE_SERVICE_ROLE_KEY` | No | — | Service-role key (**not** anon). Server-side only; never exposed to the browser. |
 
-The key never reaches the browser — it is read only inside `app/api/**` route handlers.
+Secrets never reach the browser — `OPENAI_*` and `SUPABASE_*` are read only inside `app/api/**` route handlers (and `lib/supabase/server.ts`). They are not `NEXT_PUBLIC_`.
+
+> **Migration:** apply `supabase/migrations/0001_share_path.sql` in the Supabase SQL Editor before using the live Share path.
 
 ---
 

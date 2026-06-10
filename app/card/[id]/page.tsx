@@ -15,20 +15,47 @@ export default function CardDetailPage() {
 
   const [mounted, setMounted] = useState(false);
   const [card, setCard] = useState<MomentCard | null>(null);
+  const [sharing, setSharing] = useState(false);
 
   useEffect(() => {
     if (typeof id === "string") setCard(getCard(id));
     setMounted(true);
   }, [id]);
 
-  function share() {
-    if (!card) return;
-    const invitation = createInvitation({
-      cardId: card.id,
-      shareMode: "ask_their_version",
-      question: card.shareQuestion,
-    });
-    router.push(`/share/${invitation.id}`);
+  // Create a share invitation. Prefer the Supabase-backed API (works across
+  // browsers); if Supabase isn't configured or the call fails, fall back to the
+  // localStorage invitation (same-browser only).
+  async function share() {
+    if (!card || sharing) return;
+    setSharing(true);
+    try {
+      const r = await fetch("/api/share", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          card,
+          question: card.shareQuestion,
+          shareMode: "ask_their_version",
+        }),
+      });
+      if (r.ok) {
+        const data = (await r.json()) as { id?: string };
+        if (data.id) {
+          router.push(`/share/${data.id}`);
+          return;
+        }
+      }
+      throw new Error("share api unavailable");
+    } catch {
+      const invitation = createInvitation({
+        cardId: card.id,
+        shareMode: "ask_their_version",
+        question: card.shareQuestion,
+      });
+      router.push(`/share/${invitation.id}`);
+    } finally {
+      setSharing(false);
+    }
   }
 
   if (mounted && !card) {
@@ -79,8 +106,13 @@ export default function CardDetailPage() {
 
           {/* Actions */}
           <div className="mt-6 flex flex-col gap-2.5">
-            <button type="button" onClick={share} className="halo-cta halo-cta-primary w-full">
-              Share this moment
+            <button
+              type="button"
+              onClick={share}
+              disabled={sharing}
+              className="halo-cta halo-cta-primary w-full"
+            >
+              {sharing ? "Preparing…" : "Share this moment"}
             </button>
             <Link href="/map" className="halo-cta halo-cta-secondary w-full">
               Open Memory Map

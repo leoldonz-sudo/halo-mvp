@@ -3,71 +3,122 @@
 import { useEffect, useState } from "react";
 import { useParams } from "next/navigation";
 import Link from "next/link";
-import type {
-  MomentCard,
-  RelationshipMemoryThread,
-  ShareInvitation,
-  SharedMemoryResponse,
-} from "@/lib/halo/types";
-import {
-  addResponse,
-  getCard,
-  getInvitation,
-  getThread,
-  listResponses,
-} from "@/lib/halo/store";
+import type { MomentCard, SharedMemoryResponse } from "@/lib/halo/types";
+import { addResponse, getCard, getInvitation, listResponses } from "@/lib/halo/store";
 import { MomentCardView } from "@/components/halo/MomentCardView";
 
 /**
  * Share page — what the recipient of a gentle invitation sees.
- * They read the Moment Card and the share question, then add their own version
- * of the memory. Their response weaves into a relationship memory thread shown
- * below the card.
  *
- * MVP note: persistence is localStorage, so in this demo the "recipient" is the
- * same browser. In production this route is opened by another person and the
- * thread links two accounts (see README "Current Limitations").
+ * Data source is resolved at load time:
+ *  - Supabase (via /api/share/[shareId]) when configured → works across browsers
+ *    and devices; responses persist server-side.
+ *  - localStorage fallback (same browser) when Supabase is not configured, or
+ *    for legacy localStorage share links.
+ *
+ * The UI is identical for both sources.
  */
+
+type Status = "loading" | "ready" | "notfound";
+type Source = "supabase" | "local";
+
 export default function SharePage() {
   const params = useParams<{ shareId: string }>();
   const shareId = params?.shareId;
 
-  const [mounted, setMounted] = useState(false);
-  const [invitation, setInvitation] = useState<ShareInvitation | null>(null);
+  const [status, setStatus] = useState<Status>("loading");
+  const [source, setSource] = useState<Source>("local");
   const [card, setCard] = useState<MomentCard | null>(null);
+  const [question, setQuestion] = useState<string | null>(null);
   const [responses, setResponses] = useState<SharedMemoryResponse[]>([]);
-  const [thread, setThread] = useState<RelationshipMemoryThread | null>(null);
 
   const [name, setName] = useState("");
   const [text, setText] = useState("");
+  const [submitting, setSubmitting] = useState(false);
 
   useEffect(() => {
-    if (typeof shareId === "string") {
+    let cancelled = false;
+    async function load() {
+      if (typeof shareId !== "string") {
+        setStatus("notfound");
+        return;
+      }
+      // 1) Try the Supabase-backed API (cross-browser).
+      try {
+        const r = await fetch(`/api/share/${shareId}`);
+        if (r.ok) {
+          const d = (await r.json()) as {
+            invitation?: { card?: MomentCard; question?: string | null };
+            responses?: SharedMemoryResponse[];
+          };
+          if (!cancelled && d.invitation?.card) {
+            setCard(d.invitation.card);
+            setQuestion(d.invitation.question ?? d.invitation.card.shareQuestion ?? null);
+            setResponses(d.responses ?? []);
+            setSource("supabase");
+            setStatus("ready");
+            return;
+          }
+        }
+        // 404 / 503 → fall through to localStorage.
+      } catch {
+        // network error → fall through to localStorage.
+      }
+      if (cancelled) return;
+      // 2) localStorage fallback (legacy link / Supabase off).
       const inv = getInvitation(shareId);
-      setInvitation(inv);
-      if (inv) {
-        setCard(getCard(inv.cardId));
+      const c = inv ? getCard(inv.cardId) : null;
+      if (inv && c) {
+        setCard(c);
+        setQuestion(inv.question ?? c.shareQuestion ?? null);
         setResponses(listResponses(inv.id));
-        setThread(getThread(inv.id));
+        setSource("local");
+        setStatus("ready");
+      } else {
+        setStatus("notfound");
       }
     }
-    setMounted(true);
+    load();
+    return () => {
+      cancelled = true;
+    };
   }, [shareId]);
 
-  function submit() {
-    if (!invitation || !card || !text.trim()) return;
-    const { thread: nextThread } = addResponse(invitation, card, text, name);
-    setResponses(listResponses(invitation.id));
-    setThread(nextThread);
-    setText("");
+  async function submit() {
+    if (!card || !text.trim() || submitting || typeof shareId !== "string") return;
+    setSubmitting(true);
+    try {
+      if (source === "supabase") {
+        const r = await fetch(`/api/share/${shareId}`, {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ responseText: text, responderName: name }),
+        });
+        if (r.ok) {
+          const d = (await r.json()) as { responses?: SharedMemoryResponse[] };
+          setResponses(d.responses ?? []);
+          setText("");
+        }
+        return;
+      }
+      // localStorage source
+      const inv = getInvitation(shareId);
+      if (inv) {
+        addResponse(inv, card, text, name);
+        setResponses(listResponses(inv.id));
+        setText("");
+      }
+    } finally {
+      setSubmitting(false);
+    }
   }
 
-  if (mounted && (!invitation || !card)) {
+  if (status === "notfound") {
     return (
       <main className="mx-auto flex min-h-[100dvh] max-w-[430px] flex-col items-center justify-center bg-cream px-6 text-center">
         <p className="font-display text-[22px] text-ink">This invitation isn’t here</p>
         <p className="mt-2 max-w-[18rem] font-serif text-[14px] text-ink2">
-          Shared moments live in the browser that created them.
+          The link may be incomplete, or the moment is no longer shared.
         </p>
         <Link href="/map" className="halo-cta halo-cta-primary mt-6 w-full max-w-[18rem]">
           Open Memory Map
@@ -75,8 +126,6 @@ export default function SharePage() {
       </main>
     );
   }
-
-  const question = invitation?.question || card?.shareQuestion;
 
   return (
     <main className="mx-auto flex min-h-[100dvh] max-w-[430px] flex-col bg-cream px-6 pb-[max(2.5rem,env(safe-area-inset-bottom))] pt-[max(1.5rem,env(safe-area-inset-top))]">
@@ -86,7 +135,7 @@ export default function SharePage() {
         </span>
       </header>
 
-      {!mounted || !card ? (
+      {status === "loading" || !card ? (
         <div className="mt-10 text-center font-mono text-[11px] uppercase tracking-[0.24em] text-faint">
           Opening…
         </div>
@@ -128,10 +177,10 @@ export default function SharePage() {
             <button
               type="button"
               onClick={submit}
-              disabled={!text.trim()}
+              disabled={!text.trim() || submitting}
               className="halo-cta halo-cta-primary mt-3 w-full"
             >
-              Add my memory
+              {submitting ? "Adding…" : "Add my memory"}
             </button>
           </div>
 
@@ -145,7 +194,7 @@ export default function SharePage() {
                 <span className="h-px flex-1 bg-line" />
               </div>
               <p className="mt-2 font-serif text-[13px] italic leading-snug text-ink2">
-                One moment, now held by two people{thread?.theme ? ` · ${thread.theme}` : ""}.
+                One moment, now held by two people{card.theme ? ` · ${card.theme}` : ""}.
               </p>
 
               <ol className="mt-4 flex flex-col gap-3">
